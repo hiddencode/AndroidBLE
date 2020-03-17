@@ -30,17 +30,6 @@ public class BluetoothActivity extends Activity {
     private static final int REQUEST_ENABLE_BT = 1;
     // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 10000;
-    /*
-    public void check_blue_adapter(BluetoothAdapter bluetoothAdapter){
-        Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-    }
-    /
-     */
-
-    //public final List<BluetoothDevice> ble_list = null;  // List for contain other ble devices
-    /*public void confirmResult(){
-        // got info from onActivityResult, and filling  view list
-    }*/
 
     @SuppressLint("HardwareIds")
 
