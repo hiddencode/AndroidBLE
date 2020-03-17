@@ -138,7 +138,7 @@ public class GattService extends Service {
         sendBroadcast(intent);  // send intent to broadcast
     }
 
-    /* will understand it (under: begin: 144 - end: 344)\/\/\/\/\/ */
+    /* understand it (under: begin: 144 - end: 344)\/\/\/\/\/ */
 
 
     public class LocalBinder extends Binder {

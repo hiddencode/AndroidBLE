@@ -1,52 +1,65 @@
 package com.example.intro;
 
 import androidx.annotation.RequiresApi;
-import androidx.appcompat.app.AppCompatActivity;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import android.annotation.SuppressLint;
+import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothManager;
-import android.content.Context;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.util.Log;
 import android.widget.TextView;
 
-import java.util.List;
-
 
 @RequiresApi(api = Build.VERSION_CODES.JELLY_BEAN_MR2)
-public class BluetoothActivity extends AppCompatActivity {
+public class BluetoothActivity extends Activity {
+    /* List of devices */
+    private RecyclerView rView;
+    private RecyclerView.Adapter rAdapter;
+    private RecyclerView.LayoutManager layoutManager;
+
+    private TextView textView = findViewById(R.id.txt_view);
+
     static final int SCAN_REQUEST = 1; // The request code.
     final String LOG_TAG = getClass().getSimpleName();
 
+    private static final int REQUEST_ENABLE_BT = 1;
+    // Stops scanning after 10 seconds.
+    private static final long SCAN_PERIOD = 10000;
+    /*
     public void check_blue_adapter(BluetoothAdapter bluetoothAdapter){
         Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
     }
+    /
+     */
 
     //public final List<BluetoothDevice> ble_list = null;  // List for contain other ble devices
-    public void confirmResult(){
-        /* got info from onActivityResult, and filling text view; refact text view into text list*/
-    }
+    /*public void confirmResult(){
+        // got info from onActivityResult, and filling  view list
+    }*/
 
     @SuppressLint("HardwareIds")
+
     @Override
     public void onCreate(Bundle stateBundle){
         super.onCreate(stateBundle);
         setContentView(R.layout.activity_bluetooth);
-        /* set up blue info*/
-        BluetoothManager bluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);  //get info from system service
-        BluetoothAdapter bluetoothAdapter = bluetoothManager.getAdapter();
 
-        //get own adapter
-        TextView text = findViewById(R.id.text_ble);   // Area for output info (WIP, after some times need refact it into text list)
 
-        /* Get info own ble */
-        text.setText(bluetoothAdapter.getName() + "\n" + bluetoothAdapter.getAddress());
+        rView = findViewById(R.id.rview_list);   // Area for output info
+        rView.setHasFixedSize(true);
+        // Use a liner layout manager
+        layoutManager = new LinearLayoutManager(this);
+        rView.setLayoutManager(layoutManager);
+        String[] rDaftest = {"Sdf", "dfs"};
+        rAdapter = new RViewAdapter(rDaftest);
+        //rView.setAdapter(rAdapter);
 
-    };
+    }
 
     @Override
     protected void onStart() {
@@ -58,7 +71,7 @@ public class BluetoothActivity extends AppCompatActivity {
 
 
 
-    /* Return result of scan*/
+    // Return result of scan
     @Override
     protected void onActivityResult(int request_code, int result_code, Intent result_activity){
         super.onActivityResult(request_code, result_code, result_activity);
