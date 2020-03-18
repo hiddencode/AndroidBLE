@@ -1,2 +1,6 @@
+<<<<<<< HEAD
 include ':app'
 rootProject.name='ble_demo'
+=======
+include 'Application'
+>>>>>>> 3fdec426da5e607d658001eb1cd427cc4564ac8c
