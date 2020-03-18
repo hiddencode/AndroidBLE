@@ -18,7 +18,13 @@ import android.util.Log;
 import java.util.List;
 import java.util.UUID;
 
+/*
+ * Service for Gatt works
+ * and processing
+ */
 
+//TODO: try connected to constant device
+//example:
 public class GattService extends Service {
 
     /* init TAG for Logs*/

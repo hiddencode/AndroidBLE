@@ -10,6 +10,12 @@ import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
 
+
+/*
+ * Test activity,
+ * display string from previous text area
+ * and filling clip buffer
+ */
 public class DisplayMessageActivity extends AppCompatActivity {
 
     @Override

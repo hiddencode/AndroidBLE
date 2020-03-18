@@ -7,7 +7,10 @@ import androidx.appcompat.widget.Toolbar;
 import android.view.View;
 import android.widget.EditText;
 
-
+/*
+ *  Activity for manage another activity:
+ *  Bluetooth, Display and etc . . .
+ */
 public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE = "Some description from extra message"; // const string
 
@@ -29,11 +32,12 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);                                                          // Transition with intent (intent to determine transition)
     }
 
-    /* Transition to Bluetooth */
+    /* Transition to Ble manage */
     public void checkBLE(View view){
-        Intent intent_ble = new Intent(this, BluetoothActivity.class);
+        //Intent intent_ble = new Intent(this, BluetoothActivity.class);
+        Intent intent_scan = new Intent(this, ScanLeActivity.class);
         /* . . . */
-        startActivity(intent_ble);
+        startActivity(intent_scan);
     }
 }
 
