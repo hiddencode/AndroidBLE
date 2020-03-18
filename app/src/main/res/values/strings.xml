@@ -1,20 +1,20 @@
 <resources>
-    <string name="app_name">Intro</string>
-    <string name="action_settings">Settings</string>
-    <string name="ble_not_supported">BLE not supported</string>
-    <string name="connected">connected</string>
-    <string name="disconnected">disconnected</string>
-    <string name="no_data">Empty</string>
-    <string name="error_bluetooth_not_supported">BLE not support</string>
+    <string name="app_name">ble_demo</string>
+    <string name="unknown_characteristic" />
+    <string name="unknown_service" />
     <string name="title_devices">Devices:</string>
-    <string name="unknown_device">Unknown device</string>
-    <string name="label_device_address">device_address</string>
-    <string name="label_state">label_state</string>
-    <string name="label_data">label_data</string>
-    <string name="menu_scan">menu scan</string>
-    <string name="menu_stop">menu stop</string>
+    <string name="ble_not_supported">BLE isn`t supported</string>
+    <string name="error_bluetooth_not_supported">Bluetooth not support</string>
+    <string name="unknown_device">Unk device</string>
+    <string name="connected">Connect</string>
+    <string name="disconnected">Disconnected</string>
+    <string name="label_device_address">Label of device</string>
+    <string name="label_state">Label of state</string>
+    <string name="label_data">Label of data</string>
+    <string name="no_data">Empty</string>
     <string name="menu_connect">Connect</string>
     <string name="menu_disconnect">Disconnect</string>
-    <string name="unknown_service">Unknown service</string>
-    <string name="unknown_characteristic">Unknown characteristic</string>
+    <string name="menu_scan">Scan</string>
+    <string name="menu_stop">Stop</string>
+    <string name="menu_refresh">Refresh</string>
 </resources>

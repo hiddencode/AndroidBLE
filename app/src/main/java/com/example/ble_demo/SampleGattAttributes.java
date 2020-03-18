@@ -1,4 +1,4 @@
-package com.example.intro;
+package com.example.ble_demo;
 
 import java.util.HashMap;
 
