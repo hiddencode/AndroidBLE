@@ -18,6 +18,10 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.DialogFragment;
+import androidx.fragment.app.FragmentActivity;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -103,53 +107,6 @@ public class DeviceControlActivity extends Activity {
         mDataField.setText(R.string.no_data);
     }
 
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.button_control);
-
-        final Intent intent = getIntent();
-        mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
-        mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
-
-
-        //mConnectionState = findViewById(R.id.data_value);
-        mDataField = findViewById(R.id.data_value);
-        mDataServices = findViewById(R.id.c_data);
-        mDataCharacteristics = findViewById(R.id.c_chara);
-
-        if(getActionBar()!= null) {
-            getActionBar().setTitle(mDeviceName);
-            getActionBar().setDisplayHomeAsUpEnabled(true);
-        }
-        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
-        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
-
-    }
-
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
-        if (mBluetoothLeService != null) {
-            final boolean result = mBluetoothLeService.connect(mDeviceAddress);
-            Log.d(TAG, "Connect request result=" + result);
-        }
-    }
-
-    @Override
-    protected void onPause() {
-        super.onPause();
-        unregisterReceiver(mGattUpdateReceiver);
-    }
-
-    @Override
-    protected void onDestroy() {
-        super.onDestroy();
-        unbindService(mServiceConnection);
-        mBluetoothLeService = null;
-    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -258,8 +215,14 @@ public class DeviceControlActivity extends Activity {
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
         return intentFilter;
     }
+    public void showDialog(View v) {
+        SendMessageDialogFragment dialogFragment= new SendMessageDialogFragment();
+
+    }
 
     public void CharacteristicWrite(View v){
+
+
         mBluetoothLeService.log_state_connection();
         /* startActivity(DialogFragment.class), for sending message */
     }
@@ -269,6 +232,7 @@ public class DeviceControlActivity extends Activity {
         Log.w(TAG, EXTRAS_DEVICE_NAME);
         Log.w(TAG, EXTRAS_DEVICE_ADDRESS);
         Log.w(TAG, EXTRAS_DEVICE_UUID);
+        finish();
 
         // Temperate variables
         byte[] bytes = "bytes".getBytes();
