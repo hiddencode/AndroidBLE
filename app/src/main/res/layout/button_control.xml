@@ -1,0 +1,46 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+android:orientation="vertical" android:layout_width="match_parent"
+android:layout_height="match_parent">
+
+<Button
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="Write Characteristic (WIP)"
+    android:id="@+id/c_write"
+    android:onClick="CharacteristicWrite"/>
+
+<Button
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:text="Read Characteristic (WIP)"
+    android:id="@+id/c_read"
+    android:onClick="CharacteristicRead" />
+
+    <TextView
+        android:id="@+id/data_value"
+        android:layout_width="match_parent"
+        android:layout_height="36dp"
+        android:text="@string/no_data" />
+
+    <TextView
+        android:id="@+id/c_data"
+        android:layout_width="match_parent"
+        android:layout_height="221dp"
+        android:text="@string/services" />
+    <TextView
+        android:id="@+id/c_chara"
+        android:layout_width="match_parent"
+        android:layout_height="221dp"
+        android:text="@string/characteristics" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical" />
+    </ScrollView>
+
+</LinearLayout>
