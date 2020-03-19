@@ -1,2 +1,0 @@
-# AndroidBLE
-BLE android works
