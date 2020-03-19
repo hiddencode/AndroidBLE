@@ -3,7 +3,6 @@ package com.example.androidble;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -17,10 +16,9 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;;
+import android.widget.TextView;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
@@ -45,14 +43,12 @@ public class DeviceControlActivity extends Activity {
 
     private String mDeviceName;
     private String mDeviceAddress;
-    private String mDeviceUUID;
 
     private BluetoothLeService mBluetoothLeService;
     private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics =
             new ArrayList<>();
+
     private boolean mConnected = false;
-    private BluetoothGattService gattService;
-    private BluetoothGattCharacteristic mNotifyCharacteristic;
 
     // Code to manage Service lifecycle.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
@@ -115,7 +111,6 @@ public class DeviceControlActivity extends Activity {
         final Intent intent = getIntent();
         mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
         mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
-        mDeviceUUID = intent.getStringExtra(EXTRAS_DEVICE_UUID);
 
 
         //mConnectionState = findViewById(R.id.data_value);
@@ -222,6 +217,7 @@ public class DeviceControlActivity extends Activity {
             currentServiceData.put(LIST_UUID, uuid);
             gattServiceData.add(currentServiceData);
             /* output info in view */
+            //TODO: transmit into item of listitem_device.xml
             TextData = mDataServices.getText() + "\n" + currentServiceData.toString();
             mDataServices.setText(TextData);
 
@@ -243,19 +239,7 @@ public class DeviceControlActivity extends Activity {
                 currentCharaData.put(LIST_UUID, uuid);
                 gattCharacteristicGroupData.add(currentCharaData);
 
-                /* output info in view*/
-                /*String cValue;
-
-                if(gattCharacteristic.getValue() != null) {
-                    cValue = new String(gattCharacteristic.getValue());
-                    TextData = mDataCharacteristics.getText() + "\n" + cValue;
-                }else {
-                    TextData = mDataCharacteristics.getText() + "\n" + "empty";
-                }*/
-
-//                gattCharacteristic.addDescriptor();
-//                BluetoothGattDescriptor des;
-
+                //TODO: transmit into item of {@file listitem_device}.xml
                 TextData = mDataCharacteristics.getText() + "\n" + gattCharacteristic.getUuid().toString();
                 mDataCharacteristics.setText(TextData);
 
@@ -276,7 +260,8 @@ public class DeviceControlActivity extends Activity {
     }
 
     public void CharacteristicWrite(View v){
-        assert true;
+        mBluetoothLeService.log_state_connection();
+        /* startActivity(DialogFragment.class), for sending message */
     }
 
     public void CharacteristicRead(View v) {

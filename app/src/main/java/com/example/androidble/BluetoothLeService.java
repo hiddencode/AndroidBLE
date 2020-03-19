@@ -222,6 +222,12 @@ public class BluetoothLeService extends Service {
         mBluetoothGatt = null;
     }
 
+    public void log_state_connection(){
+        String CONNECT_TAG = "State of connection: ";
+        Log.w(CONNECT_TAG, String.valueOf(mConnectionState));
+    }
+
+
 
     /* */
     public List<BluetoothGattService> getSupportedGattServices(){
