@@ -23,6 +23,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 import static java.lang.String.*;
 
@@ -275,9 +276,7 @@ public class DeviceControlActivity extends Activity {
     }
 
     public void CharacteristicWrite(View v){
-        if(mBluetoothLeService != null) {
-            mBluetoothLeService.writeCustomCharacteristic(0xAA);
-        }
+        assert true;
     }
 
     public void CharacteristicRead(View v) {
@@ -285,13 +284,14 @@ public class DeviceControlActivity extends Activity {
         Log.w(TAG, EXTRAS_DEVICE_NAME);
         Log.w(TAG, EXTRAS_DEVICE_ADDRESS);
         Log.w(TAG, EXTRAS_DEVICE_UUID);
-//            for (ArrayList<BluetoothGattCharacteristic> characteristics : mGattCharacteristics) {
-//                for (BluetoothGattCharacteristic characteristic : characteristics) {
-//                    mBluetoothLeService.readCharacteristic(characteristic);
-//                   Log.w(TAG, characteristic.toString());
-//                }
-//            }
 
+        // Temperate variables
+        byte[] bytes = "bytes".getBytes();
+        UUID add = UUID.randomUUID();
+        int pr = 0;
+        int po = 0;
 
+        mBluetoothLeService.sendMessage(add,bytes,pr,po);
     }
+
 }

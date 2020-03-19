@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">ble_demo</string>
+    <string name="app_name">BLE_Demo</string>
     <string name="unknown_characteristic" />
     <string name="unknown_service" />
     <string name="title_devices">Devices:</string>
