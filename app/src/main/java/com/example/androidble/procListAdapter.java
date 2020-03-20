@@ -1,25 +1,22 @@
-package procData;
+package com.example.androidble;
 
 import android.content.Context;
-import android.graphics.Typeface;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
-import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.example.androidble.R;
 
 import java.util.ArrayList;
 
-public class ListAdapdter extends BaseExpandableListAdapter {
+public class procListAdapter extends BaseExpandableListAdapter {
 
     private ArrayList<ArrayList<String>> mGroups;
     private Context mContext;
 
-    public ListAdapdter (Context context,ArrayList<ArrayList<String>> groups){
+    public procListAdapter(Context context, ArrayList<ArrayList<String>> groups){
         mContext = context;
         mGroups = groups;
     }
@@ -75,8 +72,8 @@ public class ListAdapdter extends BaseExpandableListAdapter {
 //        else{
 //              changing
 //        }
-        TextView textGroup = convertView.findViewById(R.id.text_group);
-        textGroup.setText("Group " + Integer.toString(groupPosition));
+        TextView textGroup = convertView.findViewById(R.id.group_text);
+        textGroup.setText("Group " + groupPosition);
 
         return convertView;
 
@@ -87,19 +84,12 @@ public class ListAdapdter extends BaseExpandableListAdapter {
                              View convertView, ViewGroup parent) {
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-            convertView = inflater.inflate(R.layout.c, null);
+            convertView = inflater.inflate(R.layout.item_view, null);
         }
-        TextView textChild = (TextView) convertView.findViewById(R.id.textChild);
+        TextView textChild = convertView.findViewById(R.id.item_text);
         textChild.setText(mGroups.get(groupPosition).get(childPosition));
 
-        Button button = (Button)convertView.findViewById(R.id.buttonChild);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Toast.makeText(mContext,"button is pressed",5000).show();
-            }
-        });
-        return convertView;
+                return convertView;
     }
 
     @Override
