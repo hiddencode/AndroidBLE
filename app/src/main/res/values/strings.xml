@@ -18,9 +18,10 @@
     <string name="menu_stop">Stop</string>
     <string name="menu_refresh">Refresh</string>
     <string name="services">Supported services:\n</string>
-    <string name="characteristics">Characteristics:\n</string>
+    <string name="chs_read">Characteristics for read:\n</string>
+    <string name="chs_write">Characteristics for write:\n</string>
     <string name="send">Send</string>
     <string name="cancel">Cancel</string>
-    <string name="stub">Stub ... Create a new phrase!</string>
+    <string name="stub">Stub ... Create a new string!</string>
     <string name="button_send">Send message</string>
 </resources>

@@ -204,7 +204,7 @@ public class BluetoothLeService extends Service {
         return true;
     }
 
-    //Disconnects an existing connection or cancel a pending connection.
+    // Disconnects an existing connection or cancel a pending connection.
     public void disconnect() {
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
             Log.w(TAG, "BluetoothAdapter not initialized");
@@ -213,7 +213,7 @@ public class BluetoothLeService extends Service {
         mBluetoothGatt.disconnect();
     }
 
-    //Close service
+    //Close Gatt profile
     public void close() {
         if (mBluetoothGatt == null) {
             return;
@@ -222,6 +222,7 @@ public class BluetoothLeService extends Service {
         mBluetoothGatt = null;
     }
 
+    // output to log
     public void log_state_connection(){
         String CONNECT_TAG = "State of connection: ";
         Log.w(CONNECT_TAG, String.valueOf(mConnectionState));
@@ -229,19 +230,33 @@ public class BluetoothLeService extends Service {
 
 
 
-    /* */
+    /* List of supported services */
     public List<BluetoothGattService> getSupportedGattServices(){
         if(mBluetoothGatt.getServices() != null) {
             return mBluetoothGatt.getServices();
         }else {
             return null;
         }
-    };
+    }
 
-    public void sendMessage(UUID uuid, byte[] value, int property, int permission){
+    /* Get characteristics with properties : WRITE */
+    public List<BluetoothGattCharacteristic> getWriteCharacteristics(){
+
+        return null;
+    }
+
+    /* Get characteristics with properties : READ */
+    public List<BluetoothGattCharacteristic> getReadCharacteristic(){
+        return null;
+    }
+
+    /* Send message (notify || command)
+     * to service, like a write characteristic
+     */
+    public boolean sendMessage(UUID uuid, byte[] value, int property, int permission){
         BluetoothGattCharacteristic gattCharacteristic = new BluetoothGattCharacteristic(uuid, property, permission);
         gattCharacteristic.setValue(value);
-        mBluetoothGatt.writeCharacteristic(gattCharacteristic);
+        return mBluetoothGatt.writeCharacteristic(gattCharacteristic);
     }
 
 }

@@ -1,7 +1,6 @@
 package com.example.androidble;
 
 import android.annotation.SuppressLint;
-import android.app.Activity;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
@@ -16,12 +15,13 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ExpandableListView;
 import android.widget.TextView;
-
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.fragment.app.DialogFragment;
-import androidx.fragment.app.FragmentActivity;
 
+import org.w3c.dom.Text;
+
+import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +32,7 @@ import static java.lang.String.*;
 /**
  *  Manage connection with device
  */
-public class DeviceControlActivity extends Activity {
+public class DeviceControlActivity extends AppCompatActivity {
     private final static String TAG = DeviceControlActivity.class.getSimpleName();
 
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
@@ -53,7 +53,6 @@ public class DeviceControlActivity extends Activity {
             new ArrayList<>();
 
     private boolean mConnected = false;
-
     // Code to manage Service lifecycle.
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
 
@@ -66,7 +65,6 @@ public class DeviceControlActivity extends Activity {
             }
             // Automatically connects to the device
             mBluetoothLeService.connect(mDeviceAddress);
-
         }
 
         @Override
@@ -75,7 +73,6 @@ public class DeviceControlActivity extends Activity {
         }
     };
 
-    // Handles various events fired by the Service.
     // ACTION_GATT_CONNECTED: connected to a GATT server.
     // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
     // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
@@ -107,6 +104,50 @@ public class DeviceControlActivity extends Activity {
         mDataField.setText(R.string.no_data);
     }
 
+    @SuppressLint("ResourceType")
+    @Override
+    public void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.button_control);    // failed in start
+
+        final Intent intent = getIntent();
+        mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
+        mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
+
+        mDataField = findViewById(R.id.data_value);
+//        mDataServices = findViewById(R.id.c_data);
+//        mDataCharacteristics = findViewById(R.id.c_chara);
+
+        if(getActionBar()!= null) {
+            getActionBar().setTitle(mDeviceName);
+            getActionBar().setDisplayHomeAsUpEnabled(true);
+        }
+        Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
+        bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
+        if (mBluetoothLeService != null) {
+            final boolean result = mBluetoothLeService.connect(mDeviceAddress);
+            Log.d(TAG, "Connect request result = " + result);
+        }
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        unregisterReceiver(mGattUpdateReceiver);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        unbindService(mServiceConnection);
+        mBluetoothLeService = null;
+    }
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -166,8 +207,8 @@ public class DeviceControlActivity extends Activity {
 
         // Loops through available GATT Services.
         for (BluetoothGattService gattService : gattServices) {
-            HashMap<String, String> currentServiceData = new HashMap<>();
             String TextData;
+            HashMap<String, String> currentServiceData = new HashMap<>();
             uuid = gattService.getUuid().toString();
             currentServiceData.put(
                     LIST_NAME, SampleGattAttributes.lookup(uuid, unknownServiceString));
@@ -175,8 +216,8 @@ public class DeviceControlActivity extends Activity {
             gattServiceData.add(currentServiceData);
             /* output info in view */
             //TODO: transmit into item of listitem_device.xml
-            TextData = mDataServices.getText() + "\n" + currentServiceData.toString();
-            mDataServices.setText(TextData);
+//            TextData = mDataServices.getText() + "\n" + currentServiceData.toString();
+//            mDataServices.setText(TextData);
 
 
             ArrayList<HashMap<String, String>> gattCharacteristicGroupData =
@@ -196,9 +237,24 @@ public class DeviceControlActivity extends Activity {
                 currentCharaData.put(LIST_UUID, uuid);
                 gattCharacteristicGroupData.add(currentCharaData);
 
-                //TODO: transmit into item of {@file listitem_device}.xml
-                TextData = mDataCharacteristics.getText() + "\n" + gattCharacteristic.getUuid().toString();
-                mDataCharacteristics.setText(TextData);
+//TODO: Make characteristics is selectable, create list for it (ListView || ExpandableListView)
+//
+//                int Permissions = gattCharacteristic.getPermissions();
+//                int Properties = gattCharacteristic.getProperties();
+//                TextData = mDataChsWrite.getText() + "\n" + Permissions;
+//                mDataChsWrite.setText(TextData);
+//                TextData = mDataChsRead.getText() + "\n" + Properties;
+//                mDataChsRead.setText(TextData);
+//
+//                if(Properties == BluetoothGattCharacteristic.PROPERTY_WRITE && Permissions == BluetoothGattCharacteristic.PERMISSION_WRITE){
+//                    // add Characteristics with WRITE condition in write chara view
+//                    TextData = mDataChsWrite.getText() + "\n" + gattCharacteristic.getUuid().toString();
+//                    mDataChsWrite.setText(TextData);
+//                }else if(Properties == BluetoothGattCharacteristic.PROPERTY_READ && Permissions == BluetoothGattCharacteristic.PERMISSION_WRITE){
+//                    // add Characteristics with READ condition in read view
+//                    TextData = mDataChsRead.getText() + "\n" + gattCharacteristic.getUuid().toString();
+//                    mDataChsRead.setText(TextData);
+//                }
 
             }
             mGattCharacteristics.add(charas);
@@ -215,32 +271,28 @@ public class DeviceControlActivity extends Activity {
         intentFilter.addAction(BluetoothLeService.ACTION_DATA_AVAILABLE);
         return intentFilter;
     }
+
+    /* Call dialog for send message (notify || command)*/
     public void showDialog(View v) {
         SendMessageDialogFragment dialogFragment= new SendMessageDialogFragment();
-
+        dialogFragment.show(getSupportFragmentManager(),"TAG");
     }
 
     public void CharacteristicWrite(View v){
-
 
         mBluetoothLeService.log_state_connection();
         /* startActivity(DialogFragment.class), for sending message */
     }
 
     public void CharacteristicRead(View v) {
-
-        Log.w(TAG, EXTRAS_DEVICE_NAME);
-        Log.w(TAG, EXTRAS_DEVICE_ADDRESS);
-        Log.w(TAG, EXTRAS_DEVICE_UUID);
-        finish();
-
+        // Transmit to WriteCharacteristic
         // Temperate variables
         byte[] bytes = "bytes".getBytes();
         UUID add = UUID.randomUUID();
-        int pr = 0;
-        int po = 0;
-
-        mBluetoothLeService.sendMessage(add,bytes,pr,po);
+        // Need select characteristic
+        if(!mBluetoothLeService.sendMessage(add,bytes,BluetoothGattCharacteristic.PROPERTY_WRITE,BluetoothGattCharacteristic.PERMISSION_WRITE)){
+            finish();
+        }
     }
 
 }

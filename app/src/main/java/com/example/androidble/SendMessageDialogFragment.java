@@ -1,6 +1,7 @@
 package com.example.androidble;
 
-import android.app.AlertDialog;
+import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import android.app.Dialog;
 import android.content.DialogInterface;
 import android.os.Bundle;
@@ -9,6 +10,7 @@ import androidx.fragment.app.DialogFragment;
 
 public class SendMessageDialogFragment extends DialogFragment {
 
+    @NonNull
     @Override
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
@@ -17,15 +19,22 @@ public class SendMessageDialogFragment extends DialogFragment {
         builder.setMessage(R.string.stub)
                 .setPositiveButton(R.string.send, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        // FIRE ZE MISSILES!
+                        /* value message
+                            uuid
+                            descriptor
+                            (what data needs for record?)
+                        */
                     }
                 })
 
                 .setNegativeButton(R.string.cancel, new DialogInterface.OnClickListener() {
                     public void onClick(DialogInterface dialog, int id) {
-                        // User cancelled the dialog
+                        /*
+                            Exit in prev state
+                         */
                     }
                 });
+
         return builder.create();
     }
 

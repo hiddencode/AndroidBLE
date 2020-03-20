@@ -1,6 +1,6 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 android:orientation="vertical" android:layout_width="match_parent"
-android:layout_height="match_parent">
+android:layout_height="match_parent" android:id="@+id/device_control">
 
 <Button
     android:layout_width="match_parent"
@@ -8,7 +8,6 @@ android:layout_height="match_parent">
     android:text="@string/button_send"
     android:id="@+id/c_write"
     android:onClick="showDialog"/>
-    <!--android:onClick="CharacteristicWrite"/>-->
 
 <Button
     android:layout_width="match_parent"
@@ -23,25 +22,27 @@ android:layout_height="match_parent">
         android:layout_height="36dp"
         android:text="@string/no_data" />
 
-    <TextView
-        android:id="@+id/c_data"
+    <ExpandableListView
+        android:id="@+id/services_list"
         android:layout_width="match_parent"
-        android:layout_height="221dp"
-        android:text="@string/services" />
-    <TextView
-        android:id="@+id/c_chara"
-        android:layout_width="match_parent"
-        android:layout_height="221dp"
-        android:text="@string/characteristics" />
+        android:layout_height="200dp"
+        android:indicatorLeft="200dp"
+        android:indicatorRight="200dp" />
 
-    <ScrollView
+    <ExpandableListView
+        android:id="@+id/chs_write_list"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="200dp"
+        android:indicatorLeft="200dp"
+        android:indicatorRight="200dp"/>
 
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical" />
-    </ScrollView>
+    <ExpandableListView
+        android:id="@+id/chs_read_list"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:indicatorLeft="200dp"
+        android:indicatorRight="200dp"/>
+
+
 
 </LinearLayout>

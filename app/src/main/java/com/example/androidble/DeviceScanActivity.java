@@ -3,7 +3,7 @@ package com.example.androidble;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.app.Activity;
+import androidx.appcompat.app.AppCompatActivity;
 import android.app.ListActivity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -24,9 +24,9 @@ import android.widget.BaseAdapter;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import java.util.ArrayList;
 import java.util.Arrays;
+
 
 /**
  * Activity for scanning and displaying available Bluetooth LE devices.
@@ -34,9 +34,7 @@ import java.util.Arrays;
 public class DeviceScanActivity extends ListActivity {
 
     /* debug void func */
-    public void noop(){
-        assert true;
-    }
+    public void noop(){ assert true;}
 
     private LeDeviceListAdapter mLeDeviceListAdapter;
     private BluetoothAdapter mBluetoothAdapter;
@@ -86,6 +84,7 @@ public class DeviceScanActivity extends ListActivity {
         }
 
     }
+
 
     // Change visible menu components
     @Override
@@ -140,7 +139,7 @@ public class DeviceScanActivity extends ListActivity {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_ENABLE_BT && resultCode == Activity.RESULT_CANCELED) {
+        if (requestCode == REQUEST_ENABLE_BT && resultCode == AppCompatActivity.RESULT_CANCELED) {
             finish();
             return;
         }
@@ -164,10 +163,15 @@ public class DeviceScanActivity extends ListActivity {
         intent.putExtra(DeviceControlActivity.EXTRAS_DEVICE_UUID, device.getUuids());
 
         String TAG = DeviceScanActivity.class.getSimpleName();
-        Log.w(TAG, device.getName());
+        String NAME;
+        if(device.getName() == null) {
+            NAME = "DEVICE_NAME";
+        }else {
+            NAME = device.getName();
+        }
+        Log.w(TAG, NAME);
         Log.w(TAG, device.getAddress());
         Log.w(TAG, Arrays.toString(device.getUuids()));
-        noop();
 
         if (mScanning) {
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
@@ -259,6 +263,7 @@ public class DeviceScanActivity extends ListActivity {
             else
                 viewHolder.deviceName.setText(R.string.unknown_device);
             viewHolder.deviceAddress.setText(device.getAddress());
+
 
             return view;
         }
