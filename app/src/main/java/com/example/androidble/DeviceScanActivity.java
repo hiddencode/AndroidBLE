@@ -33,8 +33,7 @@ import java.util.Arrays;
  */
 public class DeviceScanActivity extends ListActivity {
 
-    /* debug void func */
-    public void noop(){ assert true;}
+    static final public String LOG_TAG = "Evgeny";
 
     private LeDeviceListAdapter mLeDeviceListAdapter;
     private BluetoothAdapter mBluetoothAdapter;
@@ -54,6 +53,7 @@ public class DeviceScanActivity extends ListActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Log.i(LOG_TAG, "DeviceScanActivity:onCreate");
         if(getActionBar() != null) {
             getActionBar().setTitle(R.string.title_devices);
         }
@@ -62,7 +62,10 @@ public class DeviceScanActivity extends ListActivity {
         // Without it, ScanLeDevice not working
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
+        } else {
+
         }
+        startService(new Intent(this, BluetoothLeService.class));
 
         // Init a Bluetooth adapter.
         final BluetoothManager bluetoothManager =
@@ -134,7 +137,6 @@ public class DeviceScanActivity extends ListActivity {
         mLeDeviceListAdapter = new LeDeviceListAdapter();
         setListAdapter(mLeDeviceListAdapter);
         scanLeDevice(true);
-
     }
 
     @Override
@@ -142,6 +144,8 @@ public class DeviceScanActivity extends ListActivity {
         if (requestCode == REQUEST_ENABLE_BT && resultCode == AppCompatActivity.RESULT_CANCELED) {
             finish();
             return;
+        } else {
+            startService(new Intent(this, BluetoothLeService.class));
         }
         super.onActivityResult(requestCode, resultCode, data);
     }

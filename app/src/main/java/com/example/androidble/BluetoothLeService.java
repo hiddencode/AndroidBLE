@@ -13,11 +13,17 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
+import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
 import java.util.List;
 import java.util.UUID;
+
+import static com.example.androidble.DeviceScanActivity.LOG_TAG;
+
+//TODO: Need REFACTORING
+
 
 /**
  * Service for managing connection
@@ -49,6 +55,18 @@ public class BluetoothLeService extends Service {
     public final static UUID UUID_HEART_RATE_MEASUREMENT =
             UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
 
+    @Override
+    public void onCreate() {
+        Log.i(LOG_TAG, "BluetoothLeService:onCreate");
+        super.onCreate();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+        Log.i(LOG_TAG, "BluetoothLeService:onStartCommand");
+        return super.onStartCommand(intent, flags, startId);
+    }
+
     // Implements callback methods for GATT events that the app cares about.
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         @Override
@@ -61,7 +79,7 @@ public class BluetoothLeService extends Service {
                 Log.i(TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
                 Log.i(TAG, "Attempting to start service discovery:" +
-                        mBluetoothGatt.discoverServices());
+                mBluetoothGatt.discoverServices());
 
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED;
@@ -78,6 +96,10 @@ public class BluetoothLeService extends Service {
             } else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
             }
+
+            BluetoothGattService service = gatt.getService();
+            BluetoothGattCharacteristic characteristic = service.getCharacteristic();
+
         }
 
         @Override
@@ -239,24 +261,24 @@ public class BluetoothLeService extends Service {
         }
     }
 
-    /* Get characteristics with properties : WRITE */
-    public List<BluetoothGattCharacteristic> getWriteCharacteristics(){
-
-        return null;
-    }
-
-    /* Get characteristics with properties : READ */
-    public List<BluetoothGattCharacteristic> getReadCharacteristic(){
-        return null;
-    }
-
     /* Send message (notify || command)
      * to service, like a write characteristic
      */
     public boolean sendMessage(UUID uuid, byte[] value, int property, int permission){
         BluetoothGattCharacteristic gattCharacteristic = new BluetoothGattCharacteristic(uuid, property, permission);
+        mBluetoothGatt.getServices();
         gattCharacteristic.setValue(value);
         return mBluetoothGatt.writeCharacteristic(gattCharacteristic);
     }
+
+//    @Override
+//    public void onDestroy(){
+//        super.onDestroy();
+//
+//        Intent service = new Intent(this,BluetoothLeService.class);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            startForegroundService(service);
+//        }
+//    }
 
 }

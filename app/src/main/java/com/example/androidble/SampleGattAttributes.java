@@ -16,7 +16,7 @@ class SampleGattAttributes {
         attributes.put("0000180a-0000-1000-8000-00805f9b34fb", "Device Information Service");
         // Sample Characteristics.
         attributes.put(HEART_RATE_MEASUREMENT, "Heart Rate Measurement");
-        attributes.put("00002a29-0000-1000-8000-00805f9b34fb", "Manufacturer Name String");
+        attributes.put(CLIENT_CHARACTERISTIC_CONFIG, "Manufacturer Name String");
     }
 
     static String lookup(String uuid, String defaultName) {

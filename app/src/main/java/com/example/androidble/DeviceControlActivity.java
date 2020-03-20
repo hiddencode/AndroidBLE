@@ -287,11 +287,10 @@ public class DeviceControlActivity extends AppCompatActivity {
         // Transmit to WriteCharacteristic
         // Temperate variables
         byte[] bytes = "bytes".getBytes();
-        UUID add = UUID.randomUUID();
+        UUID uuid = UUID.fromString("ef2a2826-6a74-11ea-bc55-0242ac130004");
         // Need select characteristic
-        if(!mBluetoothLeService.sendMessage(add,bytes,BluetoothGattCharacteristic.PROPERTY_WRITE,BluetoothGattCharacteristic.PERMISSION_WRITE)){
-            finish();
-        }
+        mBluetoothLeService.sendMessage(uuid, bytes, BluetoothGattCharacteristic.PROPERTY_WRITE, BluetoothGattCharacteristic.PERMISSION_WRITE);
+
     }
 
 }

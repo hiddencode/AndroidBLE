@@ -4,13 +4,13 @@
     android:layout_height="wrap_content">
 
     <EditText
+        android:hint="UUID"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:hint="UUID" />
+        android:layout_height="match_parent"/>
 
     <EditText
-        android:hint="VALUE"
-        android:layout_width="wrap_content"
+        android:hint="VALUIE"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"/>
 
 
