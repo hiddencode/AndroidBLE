@@ -17,7 +17,7 @@ public class procListAdapter extends BaseExpandableListAdapter {
     private Context mContext;
     private String NameGroup;
 
-    public procListAdapter(Context context, ArrayList<ArrayList<String>> groups, String name) {
+    procListAdapter(Context context, ArrayList<ArrayList<String>> groups, String name) {
         mContext = context;
         mGroups = groups;
         NameGroup = name;
@@ -65,15 +65,10 @@ public class procListAdapter extends BaseExpandableListAdapter {
 
         if (convertView == null) {
             LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+            assert inflater != null;
             convertView = inflater.inflate(R.layout.group_view, null);
         }
 
-//        if (isExpanded){
-//              changing
-//        }
-//        else{
-//              changing
-//        }
         TextView textGroup = convertView.findViewById(R.id.group_text);
         textGroup.setText(NameGroup);
 

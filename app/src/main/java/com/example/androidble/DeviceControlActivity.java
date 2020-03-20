@@ -222,10 +222,8 @@ public class DeviceControlActivity extends AppCompatActivity {
             currentServiceData.put(LIST_UUID, uuid);
             gattServiceData.add(currentServiceData);
 
-
-            //TODO: transmit into item of listitem_device.xml
             // output info in view
-            ServicesData.add(gattService.toString());
+            ServicesData.add(currentServiceData.toString());
 
             ArrayList<HashMap<String, String>> gattCharacteristicGroupData =
                     new ArrayList<>();
@@ -244,10 +242,6 @@ public class DeviceControlActivity extends AppCompatActivity {
                 currentCharaData.put(LIST_UUID, uuid);
                 gattCharacteristicGroupData.add(currentCharaData);
 
-
-
-
-                //TODO: Make characteristics is selectable, create list for it (ListView || ExpandableListView)
                 // output info in view
                 ChsData.add(gattCharacteristic.getUuid().toString());
             }
