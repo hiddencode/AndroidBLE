@@ -15,10 +15,12 @@ public class procListAdapter extends BaseExpandableListAdapter {
 
     private ArrayList<ArrayList<String>> mGroups;
     private Context mContext;
+    private String NameGroup;
 
-    public procListAdapter(Context context, ArrayList<ArrayList<String>> groups){
+    public procListAdapter(Context context, ArrayList<ArrayList<String>> groups, String name) {
         mContext = context;
         mGroups = groups;
+        NameGroup = name;
     }
 
     @Override
@@ -73,7 +75,7 @@ public class procListAdapter extends BaseExpandableListAdapter {
 //              changing
 //        }
         TextView textGroup = convertView.findViewById(R.id.group_text);
-        textGroup.setText("Group " + groupPosition);
+        textGroup.setText(NameGroup);
 
         return convertView;
 
@@ -89,7 +91,7 @@ public class procListAdapter extends BaseExpandableListAdapter {
         TextView textChild = convertView.findViewById(R.id.item_text);
         textChild.setText(mGroups.get(groupPosition).get(childPosition));
 
-                return convertView;
+        return convertView;
     }
 
     @Override

@@ -2,19 +2,19 @@
 android:orientation="vertical" android:layout_width="match_parent"
 android:layout_height="match_parent" android:id="@+id/device_control">
 
-<Button
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:text="@string/button_send"
-    android:id="@+id/c_write"
-    android:onClick="showDialog"/>
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/button_send"
+        android:id="@+id/c_write"
+        android:onClick="showDialog"/>
 
-<Button
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:text="@string/stub"
-    android:id="@+id/c_read"
-    android:onClick="CharacteristicRead" />
+    <Button
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/stub"
+        android:id="@+id/c_read"
+        android:onClick="CharacteristicRead" />
 
     <TextView
         android:id="@+id/data_value"
@@ -25,23 +25,17 @@ android:layout_height="match_parent" android:id="@+id/device_control">
     <ExpandableListView
         android:id="@+id/services_list"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:indicatorLeft="200dp"
         android:indicatorRight="200dp" />
 
     <ExpandableListView
-        android:id="@+id/chs_write_list"
+        android:id="@+id/chs_list"
         android:layout_width="match_parent"
-        android:layout_height="50dp"
+        android:layout_height="wrap_content"
         android:indicatorLeft="200dp"
         android:indicatorRight="200dp"/>
 
-    <ExpandableListView
-        android:id="@+id/chs_read_list"
-        android:layout_width="match_parent"
-        android:layout_height="50dp"
-        android:indicatorLeft="200dp"
-        android:indicatorRight="200dp"/>
 
 
 

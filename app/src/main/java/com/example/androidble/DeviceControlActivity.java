@@ -16,7 +16,6 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
-import android.widget.ListAdapter;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -41,11 +40,8 @@ public class DeviceControlActivity extends AppCompatActivity {
     private static final String LIST_UUID = "DEVICE_UUID";
 
     private TextView mDataField;
-    private TextView mDataServices;
-    private TextView mDataCharacteristics;
 
-    private ExpandableListView ChsReadView;
-    private ExpandableListView ChsWriteView;
+    private ExpandableListView ChsListView;
     private ExpandableListView ServicesView;
 
     private String mDeviceName;
@@ -121,8 +117,7 @@ public class DeviceControlActivity extends AppCompatActivity {
 //        mDataServices = findViewById(R.id.c_data);
 //        mDataCharacteristics = findViewById(R.id.c_chara);
         ServicesView = findViewById(R.id.services_list);
-        ChsWriteView = findViewById(R.id.chs_write_list);
-        ChsReadView  = findViewById(R.id.chs_read_list);
+        ChsListView = findViewById(R.id.chs_list);
 
         if(getActionBar()!= null) {
             getActionBar().setTitle(mDeviceName);
@@ -205,11 +200,9 @@ public class DeviceControlActivity extends AppCompatActivity {
         if (gattServices == null) return;
 
         ArrayList<ArrayList<String>> ServicesList = new ArrayList<ArrayList<String>>();
-        ArrayList<ArrayList<String>> ChsWriteList = new ArrayList<ArrayList<String>>();
-        ArrayList<ArrayList<String>> ChsReadList  = new ArrayList<ArrayList<String>>();
+        ArrayList<ArrayList<String>> ChsList = new ArrayList<ArrayList<String>>();
         ArrayList<String> ServicesData = new ArrayList<String>();
-        ArrayList<String> ChsWriteData = new ArrayList<String>();
-        ArrayList<String> ChsReadData = new ArrayList<String>();
+        ArrayList<String> ChsData = new ArrayList<String>();
 
         String uuid = null;
         String unknownServiceString = getResources().getString(R.string.unknown_service);
@@ -256,33 +249,22 @@ public class DeviceControlActivity extends AppCompatActivity {
 
                 //TODO: Make characteristics is selectable, create list for it (ListView || ExpandableListView)
                 // output info in view
-                int Permissions = gattCharacteristic.getPermissions();
-                int Properties = gattCharacteristic.getProperties();
-                if(Properties == BluetoothGattCharacteristic.PROPERTY_WRITE && Permissions == BluetoothGattCharacteristic.PERMISSION_WRITE){
-                    // add Characteristics with WRITE condition in write chara view
-                    ChsWriteData.add(gattCharacteristic.getUuid().toString());
-                }else {
-                    // add Characteristics with READ condition in read view
-                    ChsReadData.add(gattCharacteristic.getUuid().toString());
-                }
-
+                ChsData.add(gattCharacteristic.getUuid().toString());
             }
 
             mGattCharacteristics.add(charas);
             gattCharacteristicData.add(gattCharacteristicGroupData);
         }
 
+        // Add values into groups
         ServicesList.add(ServicesData);
-        ChsWriteList.add(ChsWriteData);
-        ChsReadList.add(ChsReadData);
+        ChsList.add(ChsData);
         // Init adapters for expand lists
-        procListAdapter ServiceAdapter = new procListAdapter(getApplicationContext(), ServicesList);
-        procListAdapter ChsWriteAdapter = new procListAdapter(getApplicationContext(), ChsWriteList);
-        procListAdapter ChsReadAdapter = new procListAdapter(getApplicationContext(), ChsReadList);
+        procListAdapter ServiceAdapter = new procListAdapter(getApplicationContext(), ServicesList, "Services");
+        procListAdapter ChsWriteAdapter = new procListAdapter(getApplicationContext(), ChsList, "Characteristics");
         // Set adapters for expand lists
         ServicesView.setAdapter(ServiceAdapter);
-        ChsWriteView.setAdapter(ChsWriteAdapter);
-        ChsReadView.setAdapter(ChsReadAdapter);
+        ChsListView.setAdapter(ChsWriteAdapter);
 
     }
 
