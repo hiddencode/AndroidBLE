@@ -72,19 +72,20 @@ public class DeviceControlActivity extends AppCompatActivity {
         }
     };
 
-    // ACTION_GATT_CONNECTED: connected to a GATT server.
-    // ACTION_GATT_DISCONNECTED: disconnected from a GATT server.
-    // ACTION_GATT_SERVICES_DISCOVERED: discovered GATT services.
-    // ACTION_DATA_AVAILABLE: received data from the device.
+    /*
+     * Receive message from broadcast
+     */
     private final BroadcastReceiver mGattUpdateReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
+                // Update connection in Connect condition
                 mConnected = true;
                 updateConnectionState(R.string.connected);
                 invalidateOptionsMenu();
             } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
+                // Update connection in Disconnect condition
                 mConnected = false;
                 updateConnectionState(R.string.disconnected);
                 invalidateOptionsMenu();
@@ -114,8 +115,6 @@ public class DeviceControlActivity extends AppCompatActivity {
         mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
 
         mDataField = findViewById(R.id.data_value);
-//        mDataServices = findViewById(R.id.c_data);
-//        mDataCharacteristics = findViewById(R.id.c_chara);
         ServicesView = findViewById(R.id.services_list);
         ChsListView = findViewById(R.id.chs_list);
 
@@ -180,7 +179,7 @@ public class DeviceControlActivity extends AppCompatActivity {
     }
 
     private void updateConnectionState(final int resourceId) {
-        runOnUiThread(new Thread() {
+        runOnUiThread(new Runnable() {
             @SuppressLint("DefaultLocale")
             @Override
             public void run() {
@@ -277,9 +276,16 @@ public class DeviceControlActivity extends AppCompatActivity {
         dialogFragment.show(getSupportFragmentManager(),"TAG");
     }
 
-    public void CharacteristicWrite(View v){
+    /*
+          @NOTE:  need get service, after get characteristics of service,
+          and if characteristic have property - WRITE, then writing to value
+    */
 
-        mBluetoothLeService.log_state_connection();
+    /*
+     * Write value to selected characteristic with property - WRITE
+     */
+    public void CharacteristicWrite(View v){
+        mBluetoothLeService.log_state_connection(); // output info about connection
         /* startActivity(DialogFragment.class), for sending message */
     }
 

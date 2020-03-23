@@ -24,4 +24,5 @@
     <string name="cancel">Cancel</string>
     <string name="stub">Stub ... Create a new string!</string>
     <string name="button_send">Send message</string>
+    <string name="connect">CONNECT</string>
 </resources>

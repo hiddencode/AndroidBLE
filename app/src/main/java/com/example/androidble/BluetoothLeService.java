@@ -23,7 +23,7 @@ import java.util.UUID;
 import static com.example.androidble.DeviceScanActivity.LOG_TAG;
 
 //TODO: Need REFACTORING
-
+//      mb separate it
 
 /**
  * Service for managing connection
@@ -33,14 +33,22 @@ public class BluetoothLeService extends Service {
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
+
+    /*
+        separate
+        on different modules
+     */
+
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
     private int mConnectionState = STATE_DISCONNECTED;
 
+    /* State of connection */
     private static final int STATE_DISCONNECTED = 0;
     private static final int STATE_CONNECTING = 1;
     private static final int STATE_CONNECTED = 2;
 
+    /* Description gatt actions*/
     public final static String ACTION_GATT_CONNECTED =
             "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
     public final static String ACTION_GATT_DISCONNECTED =
@@ -51,24 +59,18 @@ public class BluetoothLeService extends Service {
             "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
     public final static String EXTRA_DATA =
             "com.example.bluetooth.le.EXTRA_DATA";
-
-    public final static UUID UUID_HEART_RATE_MEASUREMENT =
-            UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
+    public final static UUID UUID_HEART_RATE_MEASUREMENT =  UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
 
     @Override
-    public void onCreate() {
+    public void onCreate() {    // <--- entry point
         Log.i(LOG_TAG, "BluetoothLeService:onCreate");
         super.onCreate();
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(LOG_TAG, "BluetoothLeService:onStartCommand");
-        return super.onStartCommand(intent, flags, startId);
-    }
 
     // Implements callback methods for GATT events that the app cares about.
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
+        // Tracking connection state
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
             String intentAction;
@@ -80,7 +82,6 @@ public class BluetoothLeService extends Service {
                 // Attempts to discover services after successful connection.
                 Log.i(TAG, "Attempting to start service discovery:" +
                 mBluetoothGatt.discoverServices());
-
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;
@@ -96,26 +97,8 @@ public class BluetoothLeService extends Service {
             } else {
                 Log.w(TAG, "onServicesDiscovered received: " + status);
             }
-
-            BluetoothGattService service = gatt.getService();
-            BluetoothGattCharacteristic characteristic = service.getCharacteristic();
-
         }
 
-        @Override
-        public void onCharacteristicRead(BluetoothGatt gatt,
-                                         BluetoothGattCharacteristic characteristic,
-                                         int status) {
-            if (status == BluetoothGatt.GATT_SUCCESS) {
-                broadcastUpdate(characteristic);
-            }
-        }
-
-        @Override
-        public void onCharacteristicChanged(BluetoothGatt gatt,
-                                            BluetoothGattCharacteristic characteristic) {
-            broadcastUpdate(characteristic);
-        }
     };
 
     private void broadcastUpdate(final String action) {
@@ -123,6 +106,9 @@ public class BluetoothLeService extends Service {
         sendBroadcast(intent);
     }
 
+    /*
+     * Update broadcast with helps characteristic
+     */
     private void broadcastUpdate(final BluetoothGattCharacteristic characteristic) {
         final Intent intent = new Intent(BluetoothLeService.ACTION_DATA_AVAILABLE);
         // This is special handling for the Heart Rate Measurement profile.
@@ -152,6 +138,7 @@ public class BluetoothLeService extends Service {
         sendBroadcast(intent);
     }
 
+    // Local binder for getting LeDevices
     class LocalBinder extends Binder {
         BluetoothLeService getService() {
             return BluetoothLeService.this;
@@ -171,9 +158,7 @@ public class BluetoothLeService extends Service {
 
     private final IBinder mBinder = new LocalBinder();
 
-    /**
-     * Initializes a reference to the local Bluetooth adapter.
-     */
+    // Initializes a reference to the local Bluetooth adapter.
     public boolean initialize() {
         if (mBluetoothManager == null) {
             mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
@@ -192,7 +177,7 @@ public class BluetoothLeService extends Service {
         return true;
     }
 
-    /**
+    /*
      * Connects to the GATT server hosted on the Bluetooth LE device.
      */
     public boolean connect(final String address) {
@@ -271,6 +256,8 @@ public class BluetoothLeService extends Service {
         return mBluetoothGatt.writeCharacteristic(gattCharacteristic);
     }
 
+
+//    At destroy event, transmit service to tray
 //    @Override
 //    public void onDestroy(){
 //        super.onDestroy();
