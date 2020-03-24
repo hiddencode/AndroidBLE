@@ -169,8 +169,9 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
         super.onPause();
         scanLeDevice(false);
         recyclerViewAdapter.clear();
+        Intent service = new Intent(this,BluetoothLeService.class);
+        stopService(service);
     }
-
 
 
     private void scanLeDevice(final boolean enable) {

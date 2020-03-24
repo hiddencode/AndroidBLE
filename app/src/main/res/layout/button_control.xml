@@ -26,6 +26,7 @@ android:layout_height="match_parent" android:id="@+id/device_control">
         android:id="@+id/services_list"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:groupIndicator="@android:color/background_light"
         android:indicatorLeft="200dp"
         android:indicatorRight="200dp" />
 

@@ -11,7 +11,7 @@ import java.util.ArrayList;
 /*
 * This class realize adapter for expandable list
 */
-public class procListAdapter extends BaseExpandableListAdapter {
+public class ExpandableListAdapter extends BaseExpandableListAdapter {
 
 
     private ArrayList<ArrayList<String>> mGroups;
@@ -23,7 +23,7 @@ public class procListAdapter extends BaseExpandableListAdapter {
      * @param groups       -- List items of group
      * @param name         -- Name of group
      */
-    procListAdapter(Context context, ArrayList<ArrayList<String>> groups, String name) {
+    ExpandableListAdapter(Context context, ArrayList<ArrayList<String>> groups, String name) {
         mContext = context;
         mGroups = groups;
         NameGroup = name;

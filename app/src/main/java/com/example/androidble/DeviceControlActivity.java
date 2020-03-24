@@ -20,6 +20,8 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 
+import org.w3c.dom.Text;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -38,6 +40,7 @@ public class DeviceControlActivity extends AppCompatActivity {
     public static final String EXTRAS_DEVICE_UUID = "DEVICE_UUID";
     private static final String LIST_NAME = "SERVICE_NAME";
     private static final String LIST_UUID = "SERVICE_UUID";
+    private static final String LOG_TAG = "BLE-demo";
 
     private TextView mDataField;
     private ExpandableListView ServicesView;
@@ -48,6 +51,7 @@ public class DeviceControlActivity extends AppCompatActivity {
     private BluetoothLeService mBluetoothLeService;
     private ArrayList<ArrayList<BluetoothGattCharacteristic>> mGattCharacteristics =
             new ArrayList<>();
+    private ArrayList<BluetoothGattService> ArrayService = new ArrayList<>();
 
     private boolean mConnected = false;
     // Code to manage Service lifecycle.
@@ -188,7 +192,6 @@ public class DeviceControlActivity extends AppCompatActivity {
             mDataField.setText(data);
         }
     }
-
     // Demonstrates the supported GATT Services/Characteristics.
     private void displayGattServices(List<BluetoothGattService> gattServices) {
         if (gattServices == null) return;
@@ -209,13 +212,17 @@ public class DeviceControlActivity extends AppCompatActivity {
             String TextData;
             HashMap<String, String> currentServiceData = new HashMap<>();
             uuid = gattService.getUuid().toString();
+
+
+
             currentServiceData.put(
                     LIST_NAME, SampleGattAttributes.lookup(uuid, unknownServiceString));
             currentServiceData.put(LIST_UUID, uuid);
             gattServiceData.add(currentServiceData);
-
+            ArrayService.add(gattService);
+            TextData = SampleGattAttributes.lookup(uuid, unknownServiceString) + "\n" + uuid;// + "\n" + gattService.getType();
             // output info in view
-            ServicesData.add(currentServiceData.toString());
+            ServicesData.add(TextData);
 
             ArrayList<HashMap<String, String>> gattCharacteristicGroupData =
                     new ArrayList<>();
@@ -243,9 +250,29 @@ public class DeviceControlActivity extends AppCompatActivity {
         // Add values into groups
         ServicesList.add(ServicesData);
         // Init adapters for expand list
-        procListAdapter ServiceAdapter = new procListAdapter(getApplicationContext(), ServicesList, "Services");
+        ExpandableListAdapter ServiceAdapter = new ExpandableListAdapter(getApplicationContext(), ServicesList, "Services");
         // Set adapters for expand list
         ServicesView.setAdapter(ServiceAdapter);
+        // Listener event
+        ServicesView.setOnChildClickListener(new ExpandableListView.OnChildClickListener() {
+            @Override
+            public boolean onChildClick(ExpandableListView parent, View v, int groupPosition, int childPosition, long id) {
+                Log.i(LOG_TAG,"Item " + childPosition + " has been clicked");
+
+                // - Transition to Activity for processing characteristics
+                // - Transmit info about service
+                Intent serviceActivity = new Intent(DeviceControlActivity.this, ServiceControlActivity.class);
+                int type = ArrayService.get(childPosition).getType();
+                String uuid = ArrayService.get(childPosition).getUuid().toString();
+
+                //serviceActivity.putExtra(ServiceControlActivity.EXTRA_SERVICE_NAME,);
+                serviceActivity.putExtra(ServiceControlActivity.EXTRA_SERVICE_UUID, uuid);
+                serviceActivity.putExtra(ServiceControlActivity.EXTRA_SERVICE_TYPE, type);
+                startActivity(serviceActivity);
+
+                return true;
+            }
+        });
     }
 
     private static IntentFilter makeGattUpdateIntentFilter() {
@@ -264,11 +291,6 @@ public class DeviceControlActivity extends AppCompatActivity {
     }
 
     /*
-          @NOTE:  need get service, after get characteristics of service,
-          and if characteristic have property - WRITE, then writing to value
-    */
-
-    /*
      * Write value to selected characteristic with property - WRITE
      */
     public void CharacteristicWrite(View v){
@@ -279,10 +301,14 @@ public class DeviceControlActivity extends AppCompatActivity {
     public void CharacteristicRead(View v) {
         // Transmit to WriteCharacteristic
         // Temperate variables
-        byte[] bytes = "bytes".getBytes();
         UUID uuid = UUID.fromString("ef2a2826-6a74-11ea-bc55-0242ac130004");
+        byte[] bytes = "0xAAA".getBytes();
+        BluetoothGattCharacteristic chs = new BluetoothGattCharacteristic(uuid,BluetoothGattCharacteristic.PROPERTY_WRITE, BluetoothGattCharacteristic.PERMISSION_WRITE);
+
+
         // Need select characteristic
-        mBluetoothLeService.sendMessage(uuid, bytes, BluetoothGattCharacteristic.PROPERTY_WRITE, BluetoothGattCharacteristic.PERMISSION_WRITE);
+        //mBluetoothLeService.sendMessage(uuid, bytes, BluetoothGattCharacteristic.PROPERTY_WRITE, BluetoothGattCharacteristic.PERMISSION_WRITE);
+        //mBluetoothLeService.sendMessage(chs);
 
     }
 

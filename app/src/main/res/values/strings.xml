@@ -1,7 +1,7 @@
 <resources>
     <string name="app_name">BLE_Demo</string>
     <string name="unknown_characteristic" />
-    <string name="unknown_service" />
+    <string name="unknown_service">Unknown service</string>
     <string name="title_devices">Devices:</string>
     <string name="ble_not_supported">BLE isn`t supported</string>
     <string name="error_bluetooth_not_supported">Bluetooth not support</string>
