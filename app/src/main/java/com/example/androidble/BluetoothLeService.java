@@ -29,7 +29,7 @@ import static com.example.androidble.DeviceScanActivity.LOG_TAG;
  * Service for managing connection
  */
 public class BluetoothLeService extends Service {
-    private final static String TAG = BluetoothLeService.class.getSimpleName();
+    private final static String TAG = "BLE-demo";
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
@@ -182,7 +182,7 @@ public class BluetoothLeService extends Service {
      */
     public boolean connect(final String address) {
         if (mBluetoothAdapter == null || address == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized or unspecified address.");
+            Log.i(TAG, "BluetoothAdapter not initialized or unspecified address.");
             return false;
         }
 

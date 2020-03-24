@@ -36,8 +36,8 @@ public class DeviceControlActivity extends AppCompatActivity {
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
     public static final String EXTRAS_DEVICE_UUID = "DEVICE_UUID";
-    private static final String LIST_NAME = "DEVICE_NAME";
-    private static final String LIST_UUID = "DEVICE_UUID";
+    private static final String LIST_NAME = "SERVICE_NAME";
+    private static final String LIST_UUID = "SERVICE_UUID";
 
     private TextView mDataField;
     private ExpandableListView ServicesView;
@@ -236,7 +236,6 @@ public class DeviceControlActivity extends AppCompatActivity {
 
                 // output info in view
             }
-
             mGattCharacteristics.add(charas);
             gattCharacteristicData.add(gattCharacteristicGroupData);
         }

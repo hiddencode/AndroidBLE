@@ -15,7 +15,6 @@ import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.nfc.Tag;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -170,8 +169,6 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
         super.onPause();
         scanLeDevice(false);
         recyclerViewAdapter.clear();
-        Intent service = new Intent(this,BluetoothLeService.class);
-        stopService(service);
     }
 
 
@@ -215,17 +212,18 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
         };
 
     /* Transition to DeviceControl*/
-    public void onConnect(View v){
+    public void onConnect(View view){
+
         // Describe click event
-        recyclerViewAdapter.setOnItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
+        /*recyclerViewAdapter.setOnItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
             @Override
             public void onItemClick(View itemView, int position) {
                 short_way = position;
                 Log.i(LOG_TAG, "Device position:" + short_way);
             }
-        });
+        });*/
 
-        final int pos = short_way;
+        final int pos = view.getId();
         final BluetoothDevice device = recyclerViewAdapter.getDevice(pos);
         Intent activity = new Intent(this, DeviceControlActivity.class);
 
@@ -233,6 +231,10 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
         activity.putExtra(DeviceControlActivity.EXTRAS_DEVICE_NAME, device.getName());
         activity.putExtra(DeviceControlActivity.EXTRAS_DEVICE_ADDRESS, device.getAddress());
         activity.putExtra(DeviceControlActivity.EXTRAS_DEVICE_UUID, device.getUuids());
+
+        Log.i(LOG_TAG,"Position:" + pos);
+        Log.i(LOG_TAG,"Device name:" + device.getName());
+        Log.i(LOG_TAG,"Address:" + device.getAddress());
 
         startActivity(activity);
     }

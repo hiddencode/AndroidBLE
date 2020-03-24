@@ -4,7 +4,6 @@ import android.bluetooth.BluetoothDevice;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
@@ -59,13 +58,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
     }
 
     /*
-     * @return index of last changed(selected) item
-     */
-    public int notifyItemChanged(){
-        return selected_pos;
-    }
-
-    /*
      * Bind view with item from List
      * @param viewHolder    -- View for binding
      * @param i             -- Position in list
@@ -81,11 +73,11 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             viewHolder.name.setText(name);
         }
         viewHolder.address.setText(LeDevice.getAddress());
-        //selected_pos = viewHolder.getLayoutPosition();
+        viewHolder.btn_connect.setId(i);
+
     }
 
-
-    /*
+        /*
      * @return size of List
      */
     @Override
@@ -98,7 +90,6 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
         void onItemClick(View itemView, int position);
     }
 
-    // Define the method that allows the parent activity or fragment to define the listener
     public void setOnItemClickListener(OnItemClickListener listener) {
         this.listener = listener;
     }
@@ -115,6 +106,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
             name =  itemView.findViewById(R.id.device_name);
             address =  itemView.findViewById(R.id.device_address);
             btn_connect = itemView.findViewById(R.id.to_control);
+
             itemView.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v) {
@@ -127,6 +119,8 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapte
                     }
                 }
             });
+
+
         }
     }
 }
