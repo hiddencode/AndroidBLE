@@ -29,14 +29,6 @@ android:layout_height="match_parent" android:id="@+id/device_control">
         android:indicatorLeft="200dp"
         android:indicatorRight="200dp" />
 
-    <ExpandableListView
-        android:id="@+id/chs_list"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:indicatorLeft="200dp"
-        android:indicatorRight="200dp"/>
-
-
 
 
 </LinearLayout>

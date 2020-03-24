@@ -40,8 +40,6 @@ public class DeviceControlActivity extends AppCompatActivity {
     private static final String LIST_UUID = "DEVICE_UUID";
 
     private TextView mDataField;
-
-    private ExpandableListView ChsListView;
     private ExpandableListView ServicesView;
 
     private String mDeviceName;
@@ -80,12 +78,10 @@ public class DeviceControlActivity extends AppCompatActivity {
         public void onReceive(Context context, Intent intent) {
             final String action = intent.getAction();
             if (BluetoothLeService.ACTION_GATT_CONNECTED.equals(action)) {
-                // Update connection in Connect condition
                 mConnected = true;
                 updateConnectionState(R.string.connected);
                 invalidateOptionsMenu();
             } else if (BluetoothLeService.ACTION_GATT_DISCONNECTED.equals(action)) {
-                // Update connection in Disconnect condition
                 mConnected = false;
                 updateConnectionState(R.string.disconnected);
                 invalidateOptionsMenu();
@@ -116,7 +112,6 @@ public class DeviceControlActivity extends AppCompatActivity {
 
         mDataField = findViewById(R.id.data_value);
         ServicesView = findViewById(R.id.services_list);
-        ChsListView = findViewById(R.id.chs_list);
 
         if(getActionBar()!= null) {
             getActionBar().setTitle(mDeviceName);
@@ -179,7 +174,7 @@ public class DeviceControlActivity extends AppCompatActivity {
     }
 
     private void updateConnectionState(final int resourceId) {
-        runOnUiThread(new Runnable() {
+        runOnUiThread(new Thread() {
             @SuppressLint("DefaultLocale")
             @Override
             public void run() {
@@ -199,9 +194,7 @@ public class DeviceControlActivity extends AppCompatActivity {
         if (gattServices == null) return;
 
         ArrayList<ArrayList<String>> ServicesList = new ArrayList<ArrayList<String>>();
-        ArrayList<ArrayList<String>> ChsList = new ArrayList<ArrayList<String>>();
         ArrayList<String> ServicesData = new ArrayList<String>();
-        ArrayList<String> ChsData = new ArrayList<String>();
 
         String uuid = null;
         String unknownServiceString = getResources().getString(R.string.unknown_service);
@@ -242,7 +235,6 @@ public class DeviceControlActivity extends AppCompatActivity {
                 gattCharacteristicGroupData.add(currentCharaData);
 
                 // output info in view
-                ChsData.add(gattCharacteristic.getUuid().toString());
             }
 
             mGattCharacteristics.add(charas);
@@ -251,14 +243,10 @@ public class DeviceControlActivity extends AppCompatActivity {
 
         // Add values into groups
         ServicesList.add(ServicesData);
-        ChsList.add(ChsData);
-        // Init adapters for expand lists
+        // Init adapters for expand list
         procListAdapter ServiceAdapter = new procListAdapter(getApplicationContext(), ServicesList, "Services");
-        procListAdapter ChsWriteAdapter = new procListAdapter(getApplicationContext(), ChsList, "Characteristics");
-        // Set adapters for expand lists
+        // Set adapters for expand list
         ServicesView.setAdapter(ServiceAdapter);
-        ChsListView.setAdapter(ChsWriteAdapter);
-
     }
 
     private static IntentFilter makeGattUpdateIntentFilter() {

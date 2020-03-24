@@ -231,8 +231,9 @@ public class BluetoothLeService extends Service {
 
     // output to log
     public void log_state_connection(){
-        String CONNECT_TAG = "State of connection: ";
-        Log.w(CONNECT_TAG, String.valueOf(mConnectionState));
+//        String CONNECT_TAG = "State of connection: ";
+//        Log.w(CONNECT_TAG, String.valueOf(mConnectionState));
+
     }
 
 

@@ -208,7 +208,7 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
                         assert true;
                         recyclerViewAdapter.addDevice(device);
                         recyclerViewAdapter.notifyDataSetChanged();
-                        Log.i(LOG_TAG, "OnLeScan, device has been added:\n" + "Name: " + device.getName() + "\nAddress: " + device.getAddress());
+                        //Log.i(LOG_TAG, "OnLeScan, device has been added:\n" + "Name: " + device.getName() + "\nAddress: " + device.getAddress());
                     }
                 });
             }
