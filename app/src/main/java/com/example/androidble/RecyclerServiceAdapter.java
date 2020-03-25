@@ -9,13 +9,16 @@ import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 
-public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewAdapter.ViewHolder> {
+/*
+ * Adapter for list which contains Services
+ */
+public class RecyclerServiceAdapter extends RecyclerView.Adapter<RecyclerServiceAdapter.ViewHolder> {
 
     private ArrayList<BluetoothDevice> LeDeviceList;
     private LayoutInflater Inflater;
     private int selected_pos;
 
-    public RecyclerViewAdapter(LayoutInflater externalInflater) {
+    public RecyclerServiceAdapter(LayoutInflater externalInflater) {
         LeDeviceList = new ArrayList<>();
         Inflater = externalInflater;
     }

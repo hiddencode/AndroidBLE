@@ -1,6 +1,7 @@
 package com.example.androidble;
 
 import android.annotation.SuppressLint;
+import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.BroadcastReceiver;
@@ -237,6 +238,14 @@ public class DeviceControlActivity extends AppCompatActivity {
                 //serviceActivity.putExtra(ServiceControlActivity.EXTRA_SERVICE_NAME,);
                 serviceActivity.putExtra(ServiceControlActivity.EXTRA_SERVICE_UUID, uuid);
                 serviceActivity.putExtra(ServiceControlActivity.EXTRA_SERVICE_TYPE, type);
+                Bundle chsArgs;
+                //chsArgs.s
+
+                /* Working */
+                BluetoothGattService service = new BluetoothGattService(UUID.fromString(uuid),type);
+                BluetoothGatt gatt = mBluetoothLeService.getLeService();
+                Log.i(LOG_TAG,"Service - " + service.getUuid() + " have characteristics: "+ gatt.getService(service.getUuid()).getCharacteristics());
+
                 startActivity(serviceActivity);
 
                 return true;

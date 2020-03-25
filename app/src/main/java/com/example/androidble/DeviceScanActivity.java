@@ -23,7 +23,6 @@ import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.Button;
 import android.widget.Toast;
 
 
@@ -35,7 +34,7 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
     static final public String LOG_TAG = "BLE-demo";
      public Integer short_way = 0;
     //private LeDeviceListAdapter mLeDeviceListAdapter;              // create instance for list adapter -- replace to recycle view
-    private RecyclerViewAdapter recyclerViewAdapter;
+    private RecyclerServiceAdapter recyclerServiceAdapter;
     private RecyclerView recyclerView;
 
 
@@ -89,8 +88,8 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
         // Init recycler view adapter for list of le devices
         recyclerView = findViewById(R.id.scan_view);
         LayoutInflater current_inflater = DeviceScanActivity.this.getLayoutInflater();
-        recyclerViewAdapter = new RecyclerViewAdapter(current_inflater);
-        recyclerView.setAdapter(recyclerViewAdapter);
+        recyclerServiceAdapter = new RecyclerServiceAdapter(current_inflater);
+        recyclerView.setAdapter(recyclerServiceAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         Log.i(LOG_TAG, ":onCreate, recycleView has been init");
     }
@@ -118,7 +117,7 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
             case R.id.menu_scan:
-                recyclerViewAdapter.clear();
+                recyclerServiceAdapter.clear();
                 scanLeDevice(true);
                 break;
             case R.id.menu_stop:
@@ -168,9 +167,9 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
     protected void onPause() {
         super.onPause();
         scanLeDevice(false);
-        recyclerViewAdapter.clear();
-        Intent service = new Intent(this,BluetoothLeService.class);
-        stopService(service);
+        recyclerServiceAdapter.clear();
+//        Intent service = new Intent(this,BluetoothLeService.class);
+//        stopService(service);
     }
 
 
@@ -204,8 +203,8 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
                     @Override
                     public void run() {
                         assert true;
-                        recyclerViewAdapter.addDevice(device);
-                        recyclerViewAdapter.notifyDataSetChanged();
+                        recyclerServiceAdapter.addDevice(device);
+                        recyclerServiceAdapter.notifyDataSetChanged();
                         //Log.i(LOG_TAG, "OnLeScan, device has been added:\n" + "Name: " + device.getName() + "\nAddress: " + device.getAddress());
                     }
                 });
@@ -225,7 +224,7 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
         });*/
 
         final int pos = view.getId();
-        final BluetoothDevice device = recyclerViewAdapter.getDevice(pos);
+        final BluetoothDevice device = recyclerServiceAdapter.getDevice(pos);
         Intent activity = new Intent(this, DeviceControlActivity.class);
 
         // Transmit info to DeviceControl

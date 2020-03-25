@@ -13,14 +13,11 @@ import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
-import android.os.Build;
 import android.os.IBinder;
 import android.util.Log;
 
 import java.util.List;
 import java.util.UUID;
-
-import static com.example.androidble.DeviceScanActivity.LOG_TAG;
 
 //TODO: Need REFACTORING
 //      mb separate it
@@ -29,15 +26,10 @@ import static com.example.androidble.DeviceScanActivity.LOG_TAG;
  * Service for managing connection
  */
 public class BluetoothLeService extends Service {
-    private final static String TAG = "BLE-demo";
+    private final static String LOG_TAG = "BLE-demo";
 
     private BluetoothManager mBluetoothManager;
     private BluetoothAdapter mBluetoothAdapter;
-
-    /*
-        separate
-        on different modules
-     */
 
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
@@ -63,7 +55,7 @@ public class BluetoothLeService extends Service {
 
     @Override
     public void onCreate() {    // <--- entry point
-        Log.i(LOG_TAG, "BluetoothLeService:onCreate");
+        Log.i(DeviceScanActivity.LOG_TAG, "BluetoothLeService:onCreate");
         super.onCreate();
     }
 
@@ -78,14 +70,14 @@ public class BluetoothLeService extends Service {
                 intentAction = ACTION_GATT_CONNECTED;
                 mConnectionState = STATE_CONNECTED;
                 broadcastUpdate(intentAction);
-                Log.i(TAG, "Connected to GATT server.");
+                Log.i(LOG_TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
-                Log.i(TAG, "Attempting to start service discovery:" +
+                Log.i(LOG_TAG, "Attempting to start service discovery:" +
                 mBluetoothGatt.discoverServices());
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED;
                 mConnectionState = STATE_DISCONNECTED;
-                Log.i(TAG, "Disconnected from GATT server.");
+                Log.i(LOG_TAG, "Disconnected from GATT server.");
                 broadcastUpdate(intentAction);
             }
         }
@@ -95,7 +87,7 @@ public class BluetoothLeService extends Service {
             if (status == BluetoothGatt.GATT_SUCCESS) {
                 broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
             } else {
-                Log.w(TAG, "onServicesDiscovered received: " + status);
+                Log.w(LOG_TAG, "onServicesDiscovered received: " + status);
             }
         }
 
@@ -132,14 +124,14 @@ public class BluetoothLeService extends Service {
         if (mBluetoothManager == null) {
             mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
             if (mBluetoothManager == null) {
-                Log.e(TAG, "Unable to initialize BluetoothManager.");
+                Log.e(LOG_TAG, "Unable to initialize BluetoothManager.");
                 return false;
             }
         }
 
         mBluetoothAdapter = mBluetoothManager.getAdapter();
         if (mBluetoothAdapter == null) {
-            Log.e(TAG, "Unable to obtain a BluetoothAdapter.");
+            Log.e(LOG_TAG, "Unable to obtain a BluetoothAdapter.");
             return false;
         }
 
@@ -151,14 +143,14 @@ public class BluetoothLeService extends Service {
      */
     public boolean connect(final String address) {
         if (mBluetoothAdapter == null || address == null) {
-            Log.i(TAG, "BluetoothAdapter not initialized or unspecified address.");
+            Log.i(LOG_TAG, "BluetoothAdapter not initialized or unspecified address.");
             return false;
         }
 
         // Previously connected device.  Try to reconnect.
         if (address.equals(mBluetoothDeviceAddress)
                 && mBluetoothGatt != null) {
-            Log.d(TAG, "Trying to use an existing mBluetoothGatt for connection.");
+            Log.d(LOG_TAG, "Trying to use an existing mBluetoothGatt for connection.");
             if (mBluetoothGatt.connect()) {
                 mConnectionState = STATE_CONNECTING;
                 return true;
@@ -169,21 +161,22 @@ public class BluetoothLeService extends Service {
 
         final BluetoothDevice device = mBluetoothAdapter.getRemoteDevice(address);
         if (device == null) {
-            Log.w(TAG, "Device not found.  Unable to connect.");
+            Log.w(LOG_TAG, "Device not found.  Unable to connect.");
             return false;
         }
 
         mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
-        Log.d(TAG, "Trying to create a new connection.");
+        Log.d(LOG_TAG, "Trying to create a new connection.");
         mBluetoothDeviceAddress = address;
         mConnectionState = STATE_CONNECTING;
         return true;
     }
 
+
     // Disconnects an existing connection or cancel a pending connection.
     public void disconnect() {
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(TAG, "BluetoothAdapter not initialized");
+            Log.w(LOG_TAG, "BluetoothAdapter not initialized");
             return;
         }
         mBluetoothGatt.disconnect();
@@ -207,10 +200,34 @@ public class BluetoothLeService extends Service {
 
 
 
-    /* List of supported services */
+    /*
+     * Return supported service in Gatt Profile
+     */
     public List<BluetoothGattService> getSupportedGattServices(){
         if(mBluetoothGatt.getServices() != null) {
+            /* was created for logcat info*/
+//            for(BluetoothGattService service : mBluetoothGatt.getServices()){
+//                Log.i(LOG_TAG,"Service - " + service.getUuid() + " have characteristics :" + service.getCharacteristics());
+//            }
             return mBluetoothGatt.getServices();
+        }else {
+            return null;
+        }
+    }
+
+    /*
+     * For creating copy of gatt profile in other modules
+     */
+    public BluetoothGatt getLeService(){
+        return  mBluetoothGatt;
+    }
+
+    /*
+     * Return supported chs for $service
+     */
+    public List<BluetoothGattCharacteristic> getSupportedCharacteristics(BluetoothGattService service) {
+        if (mBluetoothGatt.getService(service.getUuid()).getCharacteristics().size()!= 0){
+            return mBluetoothGatt.getService(service.getUuid()).getCharacteristics();
         }else {
             return null;
         }
@@ -224,6 +241,8 @@ public class BluetoothLeService extends Service {
         mBluetoothGatt.getService(serviceUUID).getCharacteristic(writeChUUID).setValue(bytes);
         return mBluetoothGatt.writeCharacteristic(mBluetoothGatt.getService(serviceUUID).getCharacteristic(writeChUUID));
     }
+
+
 
 
 //    At destroy event, transmit service to tray
