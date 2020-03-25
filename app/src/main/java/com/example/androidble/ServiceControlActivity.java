@@ -1,19 +1,18 @@
 package com.example.androidble;
 
-import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.View;
+import android.widget.Toast;
 
-import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -26,28 +25,23 @@ public class ServiceControlActivity extends AppCompatActivity {
     RecyclerCharacteristicAdapter recyclerCharacteristicAdapter;
 
     public static final String EXTRA_SERVICE_UUID = "SERVICE_UUID";
-    public static final String EXTRA_SERVICE_TYPE = "0";
+    public static final String EXTRA_SERVICE_TYPE = "SERVICE TYPE"; //Primary || Secondary
+    public static final String EXTRA_LE_INFO = "LeInfo";
+
+    public static final int REQUEST_CODE_MESSAGE = 0xDEAD;
+    public static final String EXTRA_REQUEST = "REQUEST";
+    public static final String EXTRA_SEND_SERVICE_UUID = "SEND SERVICE UUID";
+    public static final String EXTRA_SEND_CHS_UUID = "SEND CHS UUID";
+    public static final String EXTRA_SEND_BYTES = "SEND BYTES";
 
     public static UUID serviceUUID;
     public static int serviceType;
 
-    private BluetoothLeService mBluetoothLeService;
+
     public BluetoothGattService currentService;
     public List<BluetoothGattCharacteristic> ArrayCharacteristic;
-
     private String LOG_TAG = "BLE-demo";
 
-
-    private void fillList(@NonNull List<BluetoothGattCharacteristic> characteristics) {
-       // ArrayCharacteristic.addAll(characteristics);
-        for(BluetoothGattCharacteristic characteristic : characteristics){
-            ArrayCharacteristic.add(characteristic);
-            recyclerCharacteristicAdapter.addChs(characteristic);
-            recyclerCharacteristicAdapter.notifyDataSetChanged();
-            Log.i(LOG_TAG, "CHS - " + characteristic.getUuid().toString() + " has been added");
-        }
-
-    }
 
     @Override
     public void onCreate(Bundle State){
@@ -59,64 +53,67 @@ public class ServiceControlActivity extends AppCompatActivity {
         serviceType = intent.getIntExtra(EXTRA_SERVICE_TYPE, BluetoothGattService.SERVICE_TYPE_PRIMARY);
         currentService = new BluetoothGattService(serviceUUID, serviceType);
 
+        LeInfo leInfo = intent.getParcelableExtra(EXTRA_LE_INFO);
+        if(leInfo != null) {
+            ArrayCharacteristic = leInfo.getLeCHS();
+        }
+
+        if(ArrayCharacteristic.size() != 0){
+            Log.i(LOG_TAG, "Receive data successful");
+        }
 
 
-//        if(currentService.getCharacteristics()!=null){
-//            ArrayCharacteristic.addAll(currentService.getCharacteristics());
-//            Log.i(LOG_TAG,"CHS have been added C:");
-//        }else{
-//            Log.i(LOG_TAG, "CHS are absent (>.<)");
-//        }
+        Log.i(LOG_TAG,"ServiceControlActivity: onCreate - closed");
+    }
 
+    @Override
+    public void onResume(){
+        super.onResume();
 
-//
         recyclerView = findViewById(R.id.chs_view);
         LayoutInflater current_inflater = ServiceControlActivity.this.getLayoutInflater();
         recyclerCharacteristicAdapter = new RecyclerCharacteristicAdapter(current_inflater);
         recyclerView.setAdapter(recyclerCharacteristicAdapter);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
-        /* Create demonstrate to text view */
-        if(currentService.getCharacteristics().size() == 0){
-            Log.i(LOG_TAG,"CHS are absent (>.<)");
-            BluetoothGattCharacteristic chs = new BluetoothGattCharacteristic(UUID.randomUUID(),0, 0);
-            recyclerCharacteristicAdapter.addChs(chs);
-        }else{
-            Log.i(LOG_TAG,"Have " + currentService.getCharacteristics().size() + " CHS");
+        for(BluetoothGattCharacteristic CHS : ArrayCharacteristic){
+            recyclerCharacteristicAdapter.addChs(CHS);
+            recyclerCharacteristicAdapter.notifyDataSetChanged();
         }
-
-//
-//        Log.i(LOG_TAG, "onCreate, recycleView has been init");
-//
-//        if(currentService.getCharacteristics()!= null) {
-//            for (BluetoothGattCharacteristic chs : (currentService.getCharacteristics())) {
-//                Log.i(LOG_TAG, "CHS - " + chs.getUuid().toString() + " has been added");
-//            }
-//        }else{
-//            Log.i(LOG_TAG,"SERVICE - " + currentService.getUuid().toString() + " haven`t characteristics");
-//        }
-//
-//        fillList(currentService.getCharacteristics());
-
-        Log.i(LOG_TAG,"ServiceControlActivity: onCreate - closed");
-    }
-
-
-    @Override
-    public void onResume(){
-        super.onResume();
-
 
     }
 
     /*
-        steps:
-        - getCharacteristics
-        - SelectCharacteristic
-        - record service & characteristic UUID
-        - write value (bytes)
-        - send
-
+     * Getting access to methods of ble service
+     * WIP 25.03.2020
      */
+    public void writeCHS(View view){
+        Intent intent = new Intent(this, DeviceControlActivity.class);
+        UUID CHS_UUID = ArrayCharacteristic.get(view.getId()).getUuid();
 
+        byte[] bytes = "Command".getBytes();  // for value call dialog fragment
+
+        intent.putExtra(EXTRA_SEND_SERVICE_UUID, serviceUUID.toString());
+        intent.putExtra(EXTRA_SEND_CHS_UUID, CHS_UUID.toString());
+        intent.putExtra(EXTRA_SEND_BYTES, bytes);
+
+        startActivityForResult(intent, REQUEST_CODE_MESSAGE);
+    }
+
+
+    @Override
+    public void startActivityForResult(Intent intent, int requestCode){
+        intent.putExtra(EXTRA_REQUEST, requestCode);
+        super.startActivityForResult(intent, requestCode);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
+        if(resultCode == RESULT_OK) {
+            Toast.makeText(this, "Operation success" ,Toast.LENGTH_SHORT).show();
+        } else{
+            Toast.makeText(this, "Failed operation", Toast.LENGTH_SHORT).show();
+        }
+    }
 }

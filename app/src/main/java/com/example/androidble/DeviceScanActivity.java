@@ -168,8 +168,8 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
         super.onPause();
         scanLeDevice(false);
         recyclerServiceAdapter.clear();
-//        Intent service = new Intent(this,BluetoothLeService.class);
-//        stopService(service);
+        Intent service = new Intent(this,BluetoothLeService.class);
+        stopService(service);
     }
 
 
@@ -226,6 +226,7 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
         final int pos = view.getId();
         final BluetoothDevice device = recyclerServiceAdapter.getDevice(pos);
         Intent activity = new Intent(this, DeviceControlActivity.class);
+        view.setEnabled(false);
 
         // Transmit info to DeviceControl
         activity.putExtra(DeviceControlActivity.EXTRAS_DEVICE_NAME, device.getName());
@@ -235,6 +236,7 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
         Log.i(LOG_TAG,"Position:" + pos);
         Log.i(LOG_TAG,"Device name:" + device.getName());
         Log.i(LOG_TAG,"Address:" + device.getAddress());
+
 
         startActivity(activity);
     }

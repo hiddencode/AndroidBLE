@@ -21,8 +21,7 @@ import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 
 
-import org.w3c.dom.Text;
-
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +49,7 @@ public class DeviceControlActivity extends AppCompatActivity {
     private String mDeviceAddress;
 
     private BluetoothLeService mBluetoothLeService;
+    private static BluetoothGatt copyGatt;
     private ArrayList<BluetoothGattService> ArrayService = new ArrayList<>();
 
     private boolean mConnected = false;
@@ -122,16 +122,27 @@ public class DeviceControlActivity extends AppCompatActivity {
         }
         Intent gattServiceIntent = new Intent(this, BluetoothLeService.class);
         bindService(gattServiceIntent, mServiceConnection, BIND_AUTO_CREATE);
+        checkRequest();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
-        if (mBluetoothLeService != null) {
-            final boolean result = mBluetoothLeService.connect(mDeviceAddress);
-            Log.d(TAG, "Connect request result = " + result);
-        }
+
+        /*
+        Check request code for activity result
+           if request done :
+                    processing $data
+                    send message with $data
+                    check result operation
+                setResult(RESULT_OK, intent)
+           else:
+                setResult(RESULT_FALSE, intent)
+                finish(); <- md unnecessary
+        */
+//        checkRequest();
+
     }
 
     @Override
@@ -235,17 +246,18 @@ public class DeviceControlActivity extends AppCompatActivity {
                 int type = ArrayService.get(childPosition).getType();
                 String uuid = ArrayService.get(childPosition).getUuid().toString();
 
-                //serviceActivity.putExtra(ServiceControlActivity.EXTRA_SERVICE_NAME,);
                 serviceActivity.putExtra(ServiceControlActivity.EXTRA_SERVICE_UUID, uuid);
                 serviceActivity.putExtra(ServiceControlActivity.EXTRA_SERVICE_TYPE, type);
-                Bundle chsArgs;
-                //chsArgs.s
 
                 /* Working */
                 BluetoothGattService service = new BluetoothGattService(UUID.fromString(uuid),type);
-                BluetoothGatt gatt = mBluetoothLeService.getLeService();
-                Log.i(LOG_TAG,"Service - " + service.getUuid() + " have characteristics: "+ gatt.getService(service.getUuid()).getCharacteristics());
+                BluetoothGatt LeGatt = mBluetoothLeService.getLeService();
+                List<BluetoothGattCharacteristic>  LeCHS = LeGatt.getService(service.getUuid()).getCharacteristics();
+                Log.i(LOG_TAG,"Service - " + service.getUuid() + " have characteristics: " + LeGatt.getService(service.getUuid()).getCharacteristics());
+                serviceActivity.putExtra(ServiceControlActivity.EXTRA_LE_INFO, new LeInfo(LeCHS));
 
+                // for onActivityResult
+                copyGatt = LeGatt;
                 startActivity(serviceActivity);
 
                 return true;
@@ -268,14 +280,6 @@ public class DeviceControlActivity extends AppCompatActivity {
         dialogFragment.show(getSupportFragmentManager(),"TAG");
     }
 
-    /*
-     * Write value to selected characteristic with property - WRITE
-     */
-    public void CharacteristicWrite(View v){
-        mBluetoothLeService.log_state_connection(); // output info about connection
-        /* startActivity(DialogFragment.class), for sending message */
-    }
-
     public void CharacteristicRead(View v) {
         // Transmit to WriteCharacteristic
         // Temperate variables
@@ -283,11 +287,30 @@ public class DeviceControlActivity extends AppCompatActivity {
         byte[] bytes = "0xAAA".getBytes();
         BluetoothGattCharacteristic chs = new BluetoothGattCharacteristic(uuid,BluetoothGattCharacteristic.PROPERTY_WRITE, BluetoothGattCharacteristic.PERMISSION_WRITE);
 
-
-        // Need select characteristic
-        //mBluetoothLeService.sendMessage(uuid, bytes, BluetoothGattCharacteristic.PROPERTY_WRITE, BluetoothGattCharacteristic.PERMISSION_WRITE);
-        //mBluetoothLeService.sendMessage(chs);
-
     }
+
+    public void checkRequest(){
+        Intent intent = getIntent();
+        int requestCode = intent.getIntExtra(ServiceControlActivity.EXTRA_REQUEST, 0);
+
+        if(requestCode == ServiceControlActivity.REQUEST_CODE_MESSAGE){
+
+            UUID serviceUUID = UUID.fromString(intent.getStringExtra(ServiceControlActivity.EXTRA_SEND_SERVICE_UUID));
+            UUID chsUUID = UUID.fromString(intent.getStringExtra(ServiceControlActivity.EXTRA_SEND_CHS_UUID));
+            byte[] bytes = intent.getByteArrayExtra(ServiceControlActivity.EXTRA_SEND_BYTES);
+
+            Log.i(LOG_TAG, " " + copyGatt);
+
+            copyGatt.getService(serviceUUID).getCharacteristic(chsUUID).setValue(bytes);
+            if(copyGatt.writeCharacteristic(copyGatt.getService(serviceUUID).getCharacteristic(chsUUID))){
+               setResult(RESULT_OK);
+               finish();
+            }else{
+                setResult(RESULT_CANCELED);
+                finish();
+            }
+        }
+    }
+
 
 }
