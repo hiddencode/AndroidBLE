@@ -1,4 +1,4 @@
-package com.example.androidble;
+package com.example.androidble.adapters;
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -6,6 +6,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseExpandableListAdapter;
 import android.widget.TextView;
+
+import com.example.androidble.R;
+
 import java.util.ArrayList;
 
 /*
@@ -23,7 +26,7 @@ public class ExpandableListAdapter extends BaseExpandableListAdapter {
      * @param groups       -- List items of group
      * @param name         -- Name of group
      */
-    ExpandableListAdapter(Context context, ArrayList<ArrayList<String>> groups, String name) {
+    public ExpandableListAdapter(Context context, ArrayList<ArrayList<String>> groups, String name) {
         mContext = context;
         mGroups = groups;
         NameGroup = name;

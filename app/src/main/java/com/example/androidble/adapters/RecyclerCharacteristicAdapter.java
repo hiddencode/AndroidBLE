@@ -1,6 +1,5 @@
-package com.example.androidble;
+package com.example.androidble.adapters;
 
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -8,6 +7,9 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.recyclerview.widget.RecyclerView;
+
+import com.example.androidble.R;
+
 import java.util.ArrayList;
 
 import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_READ;
@@ -36,22 +38,6 @@ public class RecyclerCharacteristicAdapter extends RecyclerView.Adapter<Recycler
             CharacteristicList.add(Characteristic);
         }
     }
-
-    /*
-     * @param pos   -- position in List
-     * @return Le Device on position
-     */
-    public BluetoothGattCharacteristic getDevice(int pos){
-        return CharacteristicList.get(pos);
-    }
-
-    /*
-     * Clear list
-     */
-    public void clear(){
-        CharacteristicList.clear();
-    }
-
 
     /*
      * Create new item in List
@@ -106,53 +92,61 @@ public class RecyclerCharacteristicAdapter extends RecyclerView.Adapter<Recycler
                 property = "UNKNOWN";
         }
         viewHolder.property.setText(property);
+
+        String permisson;
+        switch(Characteristic.getPermissions()){
+            case BluetoothGattCharacteristic.PERMISSION_READ :
+                permisson = "PERMISSION_READ";
+                break;
+            case BluetoothGattCharacteristic.PERMISSION_READ_ENCRYPTED :
+                permisson = "PERMISSION_READ_ENCRYPTED";
+                break;
+            case BluetoothGattCharacteristic.PERMISSION_READ_ENCRYPTED_MITM :
+                permisson = "PERMISSION_READ_ENCRYPTED_MITM";
+                break;
+            case BluetoothGattCharacteristic.PERMISSION_WRITE :
+                permisson = "PERMISSION_WRITE";
+                break;
+            case BluetoothGattCharacteristic.PERMISSION_WRITE_ENCRYPTED :
+                permisson = "PERMISSION_WRITE_ENCRYPTED";
+                break;
+            case BluetoothGattCharacteristic.PERMISSION_WRITE_ENCRYPTED_MITM :
+                permisson = "PERMISSION_WRITE_ENCRYPTED_MITM";
+                break;
+            case BluetoothGattCharacteristic.PERMISSION_WRITE_SIGNED :
+                permisson = "PERMISSION_WRITE_SIGNED";
+                break;
+            case BluetoothGattCharacteristic.PERMISSION_WRITE_SIGNED_MITM :
+                permisson = "PERMISSION_WRITE_SIGNED_MITM";
+                break;
+            default:
+                permisson = "UNKNOWN";
+        }
+        viewHolder.permission.setText(permisson);;
         viewHolder.btn_connect.setId(i);
 
     }
 
-    /*
-     * @return size of List
-     */
     @Override
     public int getItemCount() {
         return CharacteristicList.size();
     }
 
-    private OnItemClickListener listener;
-    public interface OnItemClickListener{
-        void onItemClick(View itemView, int position);
-    }
-
-    public void setOnItemClickListener(OnItemClickListener listener) {
-        this.listener = listener;
-    }
     /*
      * Class describe components of item in List
      */
     public class ViewHolder extends RecyclerView.ViewHolder {
         private TextView uuid;
         private TextView property;
+        private TextView permission;
         private Button btn_connect;
 
         ViewHolder(final View itemView) {
             super(itemView);
             uuid =  itemView.findViewById(R.id.chs_uuid);
             property =  itemView.findViewById(R.id.chs_property);
+            permission = itemView.findViewById(R.id.chs_permisson);
             btn_connect = itemView.findViewById(R.id.button);
-
-//            itemView.setOnClickListener(new View.OnClickListener(){
-//                @Override
-//                public void onClick(View v) {
-//                    if (listener != null) {
-//                        int pos = getAdapterPosition();
-//                        if(pos != RecyclerView.NO_POSITION){
-//                            listener.onItemClick(itemView,pos);
-//                            selected_pos = pos;
-//                        }
-//                    }
-//                }
-//            });
-
 
         }
     }

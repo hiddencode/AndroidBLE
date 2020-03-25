@@ -6,7 +6,6 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
-import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothManager;
 import android.bluetooth.BluetoothProfile;
@@ -18,9 +17,6 @@ import android.util.Log;
 
 import java.util.List;
 import java.util.UUID;
-
-//TODO: Need REFACTORING
-//      mb separate it
 
 /**
  * Service for managing connection
@@ -54,8 +50,8 @@ public class BluetoothLeService extends Service {
     public final static UUID UUID_HEART_RATE_MEASUREMENT =  UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
 
     @Override
-    public void onCreate() {    // <--- entry point
-        Log.i(DeviceScanActivity.LOG_TAG, "BluetoothLeService:onCreate");
+    public void onCreate() {
+        Log.i(DeviceScanActivity.LOG_TAG, "BluetoothLeService - onCreate");
         super.onCreate();
     }
 
@@ -143,7 +139,6 @@ public class BluetoothLeService extends Service {
      */
     public boolean connect(final String address) {
         if (mBluetoothAdapter == null || address == null) {
-            Log.i(LOG_TAG, "BluetoothAdapter not initialized or unspecified address.");
             return false;
         }
 
@@ -198,10 +193,6 @@ public class BluetoothLeService extends Service {
      */
     public List<BluetoothGattService> getSupportedGattServices(){
         if(mBluetoothGatt.getServices() != null) {
-            /* was created for logcat info*/
-//            for(BluetoothGattService service : mBluetoothGatt.getServices()){
-//                Log.i(LOG_TAG,"Service - " + service.getUuid() + " have characteristics :" + service.getCharacteristics());
-//            }
             return mBluetoothGatt.getServices();
         }else {
             return null;
@@ -215,30 +206,8 @@ public class BluetoothLeService extends Service {
         return  mBluetoothGatt;
     }
 
-    /*
-     * Return supported chs for $service
-     */
-    public List<BluetoothGattCharacteristic> getSupportedCharacteristics(BluetoothGattService service) {
-        if (mBluetoothGatt.getService(service.getUuid()).getCharacteristics().size()!= 0){
-            return mBluetoothGatt.getService(service.getUuid()).getCharacteristics();
-        }else {
-            return null;
-        }
-    }
 
-    /* Send message (notify || command)
-     * to service, like a write characteristic
-     */
-    public boolean sendMessage(UUID serviceUUID, UUID writeChUUID, byte[] bytes){
-
-        mBluetoothGatt.getService(serviceUUID).getCharacteristic(writeChUUID).setValue(bytes);
-        return mBluetoothGatt.writeCharacteristic(mBluetoothGatt.getService(serviceUUID).getCharacteristic(writeChUUID));
-    }
-
-
-
-
-//    At destroy event, transmit service to tray
+    //At destroy event, transmit service to tray
 //    @Override
 //    public void onDestroy(){
 //        super.onDestroy();

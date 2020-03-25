@@ -1,7 +1,6 @@
-package com.example.androidble;
+package com.example.androidble.ifaces;
 
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattService;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.Log;

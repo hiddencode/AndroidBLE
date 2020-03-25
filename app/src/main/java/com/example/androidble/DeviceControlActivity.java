@@ -18,12 +18,16 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
 
 
-import java.io.Serializable;
+import com.example.androidble.adapters.ExpandableListAdapter;
+import com.example.androidble.dialogs.WriteMessageDialogFragment;
+import com.example.androidble.ifaces.LeInfo;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.UUID;
 
@@ -64,7 +68,11 @@ public class DeviceControlActivity extends AppCompatActivity {
                 finish();
             }
             // Automatically connects to the device
-            mBluetoothLeService.connect(mDeviceAddress);
+            if(!mBluetoothLeService.connect(mDeviceAddress)){
+                //Toast.makeText(this, "Failed connection", Toast.LENGTH_SHORT).show();
+                finish();;
+            }
+
         }
 
         @Override
@@ -141,8 +149,6 @@ public class DeviceControlActivity extends AppCompatActivity {
                 setResult(RESULT_FALSE, intent)
                 finish(); <- md unnecessary
         */
-//        checkRequest();
-
     }
 
     @Override
@@ -192,7 +198,7 @@ public class DeviceControlActivity extends AppCompatActivity {
             @SuppressLint("DefaultLocale")
             @Override
             public void run() {
-            mDataField.setText(format("%d/%s/%s", resourceId, mDeviceName, mDeviceAddress));
+                mDataField.setText(format("%d/%s/%s", resourceId, mDeviceName, mDeviceAddress));
             }
         });
     }
@@ -215,12 +221,7 @@ public class DeviceControlActivity extends AppCompatActivity {
         // Loops through available GATT Services.
         for (BluetoothGattService gattService : gattServices) {
             String TextData;
-            HashMap<String, String> currentServiceData = new HashMap<>();
             uuid = gattService.getUuid().toString();
-
-            currentServiceData.put(
-                    LIST_NAME, SampleGattAttributes.lookup(uuid, unknownServiceString));
-            currentServiceData.put(LIST_UUID, uuid);
             ArrayService.add(gattService);
             TextData = SampleGattAttributes.lookup(uuid, unknownServiceString) + "\n" + uuid;// + "\n" + gattService.getType();
             // output info in view
@@ -276,7 +277,7 @@ public class DeviceControlActivity extends AppCompatActivity {
 
     /* Call dialog for send message (notify || command)*/
     public void showDialog(View v) {
-        SendMessageDialogFragment dialogFragment= new SendMessageDialogFragment();
+        WriteMessageDialogFragment dialogFragment= new WriteMessageDialogFragment();
         dialogFragment.show(getSupportFragmentManager(),"TAG");
     }
 
@@ -298,8 +299,6 @@ public class DeviceControlActivity extends AppCompatActivity {
             UUID serviceUUID = UUID.fromString(intent.getStringExtra(ServiceControlActivity.EXTRA_SEND_SERVICE_UUID));
             UUID chsUUID = UUID.fromString(intent.getStringExtra(ServiceControlActivity.EXTRA_SEND_CHS_UUID));
             byte[] bytes = intent.getByteArrayExtra(ServiceControlActivity.EXTRA_SEND_BYTES);
-
-            Log.i(LOG_TAG, " " + copyGatt);
 
             copyGatt.getService(serviceUUID).getCharacteristic(chsUUID).setValue(bytes);
             if(copyGatt.writeCharacteristic(copyGatt.getService(serviceUUID).getCharacteristic(chsUUID))){

@@ -13,6 +13,9 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.androidble.adapters.RecyclerCharacteristicAdapter;
+import com.example.androidble.ifaces.LeInfo;
+
 import java.util.List;
 import java.util.UUID;
 
@@ -85,7 +88,6 @@ public class ServiceControlActivity extends AppCompatActivity {
 
     /*
      * Getting access to methods of ble service
-     * WIP 25.03.2020
      */
     public void writeCHS(View view){
         Intent intent = new Intent(this, DeviceControlActivity.class);

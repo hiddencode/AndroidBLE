@@ -25,6 +25,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.Toast;
 
+import com.example.androidble.adapters.RecyclerServiceAdapter;
+
 
 /**
  * Activity for scanning and displaying available Bluetooth LE devices.
@@ -205,7 +207,6 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
                         assert true;
                         recyclerServiceAdapter.addDevice(device);
                         recyclerServiceAdapter.notifyDataSetChanged();
-                        //Log.i(LOG_TAG, "OnLeScan, device has been added:\n" + "Name: " + device.getName() + "\nAddress: " + device.getAddress());
                     }
                 });
             }
@@ -213,15 +214,6 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
 
     /* Transition to DeviceControl*/
     public void onConnect(View view){
-
-        // Describe click event
-        /*recyclerViewAdapter.setOnItemClickListener(new RecyclerViewAdapter.OnItemClickListener() {
-            @Override
-            public void onItemClick(View itemView, int position) {
-                short_way = position;
-                Log.i(LOG_TAG, "Device position:" + short_way);
-            }
-        });*/
 
         final int pos = view.getId();
         final BluetoothDevice device = recyclerServiceAdapter.getDevice(pos);

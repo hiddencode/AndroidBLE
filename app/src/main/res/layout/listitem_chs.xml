@@ -10,7 +10,21 @@
         android:id="@+id/chs_uuid"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:textSize="14sp"
+        app:layout_constraintBottom_toTopOf="@+id/chs_property"
+        app:layout_constraintEnd_toStartOf="@+id/button"
+        app:layout_constraintHorizontal_bias="0.021"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"
+        tools:ignore="MissingConstraints"/>
+
+    <TextView
+        android:id="@+id/chs_property"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
         android:textSize="10sp"
+        app:layout_constraintBottom_toTopOf="@+id/chs_permisson"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/button"
         app:layout_constraintHorizontal_bias="0.021"
@@ -20,35 +34,36 @@
         tools:ignore="MissingConstraints" />
 
     <TextView
-        android:id="@+id/chs_property"
+        android:id="@+id/chs_permisson"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="24sp"
-        app:layout_constraintBottom_toTopOf="@+id/chs_uuid"
+        android:textSize="10sp"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toStartOf="@+id/button"
         app:layout_constraintHorizontal_bias="0.021"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintVertical_bias="0.969"
         tools:ignore="MissingConstraints" />
+
 
     <Button
         android:id="@+id/button"
-        android:onClick="writeCHS"
         android:layout_width="85dp"
         android:layout_height="47dp"
+        android:onClick="writeCHS"
         android:paddingLeft="16dp"
         android:paddingTop="16dp"
         android:paddingRight="16dp"
         android:paddingBottom="16dp"
+        android:text="@string/write"
         android:textSize="10sp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.981"
+        app:layout_constraintHorizontal_bias="0.987"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
-        tools:visibility="visible"
-        android:text="@string/read"/>
+        app:layout_constraintVertical_bias="0.533"
+        tools:visibility="visible" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

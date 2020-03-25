@@ -1,4 +1,4 @@
-package com.example.androidble;
+package com.example.androidble.dialogs;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AlertDialog;
@@ -9,7 +9,9 @@ import android.view.LayoutInflater;
 
 import androidx.fragment.app.DialogFragment;
 
-public class SendMessageDialogFragment extends DialogFragment {
+import com.example.androidble.R;
+
+public class WriteMessageDialogFragment extends DialogFragment {
 
     @NonNull
     @Override
