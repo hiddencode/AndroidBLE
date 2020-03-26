@@ -14,6 +14,7 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.androidble.adapters.RecyclerCharacteristicAdapter;
+import com.example.androidble.dialogs.WriteMessageDialogFragment;
 import com.example.androidble.ifaces.LeInfo;
 
 import java.util.List;
@@ -32,6 +33,9 @@ public class ServiceControlActivity extends AppCompatActivity {
     public static final String EXTRA_LE_INFO = "LeInfo";
 
     public static final int REQUEST_CODE_MESSAGE = 0xDEAD;
+    public static final int REQUEST_CODE_WRITE = 0xAC00;
+    public static final int REQUEST_CODE_READ = 0XCA00;
+
     public static final String EXTRA_REQUEST = "REQUEST";
     public static final String EXTRA_SEND_SERVICE_UUID = "SEND SERVICE UUID";
     public static final String EXTRA_SEND_CHS_UUID = "SEND CHS UUID";
@@ -43,6 +47,9 @@ public class ServiceControlActivity extends AppCompatActivity {
 
     public BluetoothGattService currentService;
     public List<BluetoothGattCharacteristic> ArrayCharacteristic;
+
+    public WriteMessageDialogFragment  dialogFragment;
+
     private String LOG_TAG = "BLE-demo";
 
 
@@ -65,7 +72,6 @@ public class ServiceControlActivity extends AppCompatActivity {
             Log.i(LOG_TAG, "Receive data successful");
         }
 
-
         Log.i(LOG_TAG,"ServiceControlActivity: onCreate - closed");
     }
 
@@ -86,22 +92,50 @@ public class ServiceControlActivity extends AppCompatActivity {
 
     }
 
+
+    /* Call dialog for set value for send message (notify || command) */
+    public void showDialog(final View view) {
+        String TAG_TX = "WRITE_CHS";
+        String TAG_RX = "READ_CHS";
+        final View iview =view;
+        if(iview.getTag() == TAG_TX) {
+            dialogFragment = new WriteMessageDialogFragment();
+            dialogFragment.show(getSupportFragmentManager(), "WRITE");
+            dialogFragment.setDismissListener(new WriteMessageDialogFragment.OnDismissListener() {
+                @Override
+                public void onDismiss(WriteMessageDialogFragment wmdf, byte[] Value) {
+                    writeCHS(iview, Value);
+                }
+            });
+        }else  if(iview.getTag() == TAG_RX){
+            readCHS(iview);
+        }
+    }
+
     /*
      * Getting access to methods of ble service
      */
-    public void writeCHS(View view){
+    public void writeCHS(View view, byte[] Value){
         Intent intent = new Intent(this, DeviceControlActivity.class);
         UUID CHS_UUID = ArrayCharacteristic.get(view.getId()).getUuid();
-
-        byte[] bytes = "Command".getBytes();  // for value call dialog fragment
+        byte[] bytes = Value;
 
         intent.putExtra(EXTRA_SEND_SERVICE_UUID, serviceUUID.toString());
         intent.putExtra(EXTRA_SEND_CHS_UUID, CHS_UUID.toString());
         intent.putExtra(EXTRA_SEND_BYTES, bytes);
 
-        startActivityForResult(intent, REQUEST_CODE_MESSAGE);
+        startActivityForResult(intent, REQUEST_CODE_WRITE);
     }
 
+    public void readCHS(View view){
+        Intent intent = new Intent(this, DeviceControlActivity.class);
+        UUID CHS_UUID = ArrayCharacteristic.get(view.getId()).getUuid();
+
+        intent.putExtra(EXTRA_SEND_SERVICE_UUID, serviceUUID.toString());
+        intent.putExtra(EXTRA_SEND_CHS_UUID, CHS_UUID.toString());
+
+        startActivityForResult(intent, REQUEST_CODE_READ);
+    }
 
     @Override
     public void startActivityForResult(Intent intent, int requestCode){
@@ -114,8 +148,8 @@ public class ServiceControlActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if(resultCode == RESULT_OK) {
             Toast.makeText(this, "Operation success" ,Toast.LENGTH_SHORT).show();
-        } else{
-            Toast.makeText(this, "Failed operation", Toast.LENGTH_SHORT).show();
+        }else{
+            Toast.makeText(this, "Operation failed", Toast.LENGTH_SHORT).show();
         }
     }
 }

@@ -9,7 +9,6 @@ class SampleGattAttributes {
     private static HashMap attributes = new HashMap();                                   // hash map for processing string
     static String HEART_RATE_MEASUREMENT = "00002a37-0000-1000-8000-00805f9b34fb";       // some value for heart rate
     static String CLIENT_CHARACTERISTIC_CONFIG = "00002902-0000-1000-8000-00805f9b34fb"; // some value for client characteristic
-    static String CLIENT_NAME = "Faker";
 
     static {
         // Sample Services.

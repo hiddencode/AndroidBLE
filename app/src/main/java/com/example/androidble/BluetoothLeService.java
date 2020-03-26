@@ -161,7 +161,6 @@ public class BluetoothLeService extends Service {
         }
 
         mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
-        Log.d(LOG_TAG, "Trying to create a new connection.");
         mBluetoothDeviceAddress = address;
         mConnectionState = STATE_CONNECTING;
         return true;
@@ -171,7 +170,6 @@ public class BluetoothLeService extends Service {
     // Disconnects an existing connection or cancel a pending connection.
     public void disconnect() {
         if (mBluetoothAdapter == null || mBluetoothGatt == null) {
-            Log.w(LOG_TAG, "BluetoothAdapter not initialized");
             return;
         }
         mBluetoothGatt.disconnect();

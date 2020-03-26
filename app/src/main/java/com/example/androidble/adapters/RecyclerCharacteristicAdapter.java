@@ -1,6 +1,7 @@
 package com.example.androidble.adapters;
 
 import android.bluetooth.BluetoothGattCharacteristic;
+import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -12,13 +13,17 @@ import com.example.androidble.R;
 
 import java.util.ArrayList;
 
-import static android.bluetooth.BluetoothGattCharacteristic.PROPERTY_READ;
 
 
 /*
  * Adapter for list which contains Characteristics
  */
 public class RecyclerCharacteristicAdapter extends RecyclerView.Adapter<RecyclerCharacteristicAdapter.ViewHolder> {
+
+    private static final String TAG_TX = "WRITE_CHS";
+    private static final String TAG_RX = "READ_CHS";
+    private static final String TEXT_TX = "WRITE";
+    private static final String TEXT_RX = "READ";
 
     private ArrayList<BluetoothGattCharacteristic> CharacteristicList;
     private LayoutInflater Inflater;
@@ -65,31 +70,49 @@ public class RecyclerCharacteristicAdapter extends RecyclerView.Adapter<Recycler
         viewHolder.uuid.setText(Characteristic.getUuid().toString());
 
         ///mb refactor
+        String btn_tag;
+        String btn_text ;
         String property;
         switch (Characteristic.getProperties()){
             case BluetoothGattCharacteristic.PROPERTY_BROADCAST :
                 property = "BROADCAST";
+                btn_tag = TAG_RX;
+                btn_text = TEXT_RX;
                 break;
-            case PROPERTY_READ :
+            case BluetoothGattCharacteristic.PROPERTY_READ :
                 property = "READ";
+                btn_tag = TAG_RX;
+                btn_text = TEXT_RX;
                 break;
             case BluetoothGattCharacteristic.PROPERTY_WRITE_NO_RESPONSE :
                 property = "WRITE NO RESPONSE";
+                btn_tag = TAG_TX;
+                btn_text = TEXT_TX;
                 break;
             case BluetoothGattCharacteristic.PROPERTY_NOTIFY :
                 property = "NOTIFY";
+                btn_tag = TAG_TX;
+                btn_text = TEXT_TX;
                 break;
             case BluetoothGattCharacteristic.PROPERTY_INDICATE :
                 property = "INDICATE";
+                btn_tag = TAG_RX;
+                btn_text = TEXT_RX;
                 break;
             case BluetoothGattCharacteristic.PROPERTY_SIGNED_WRITE :
                 property = "SIGNED WRITE";
+                btn_tag = TAG_TX;
+                btn_text = TEXT_TX;
                 break;
             case BluetoothGattCharacteristic.PROPERTY_EXTENDED_PROPS :
                 property = "EXTENDED PROPS";
+                btn_tag = TAG_TX;
+                btn_text = TEXT_TX;
                 break;
             default:
                 property = "UNKNOWN";
+                btn_tag = TAG_TX;
+                btn_text = TEXT_TX;
         }
         viewHolder.property.setText(property);
 
@@ -123,6 +146,8 @@ public class RecyclerCharacteristicAdapter extends RecyclerView.Adapter<Recycler
                 permisson = "UNKNOWN";
         }
         viewHolder.permission.setText(permisson);;
+        viewHolder.btn_connect.setTag(btn_tag);
+        viewHolder.btn_connect.setText(btn_text);
         viewHolder.btn_connect.setId(i);
 
     }

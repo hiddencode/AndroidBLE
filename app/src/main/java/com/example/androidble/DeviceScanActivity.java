@@ -34,8 +34,6 @@ import com.example.androidble.adapters.RecyclerServiceAdapter;
 public class DeviceScanActivity extends AppCompatActivity {          //init class
 
     static final public String LOG_TAG = "BLE-demo";
-     public Integer short_way = 0;
-    //private LeDeviceListAdapter mLeDeviceListAdapter;              // create instance for list adapter -- replace to recycle view
     private RecyclerServiceAdapter recyclerServiceAdapter;
     private RecyclerView recyclerView;
 
@@ -212,7 +210,7 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
             }
         };
 
-    /* Transition to DeviceControl*/
+    /* Transition to DeviceControl */
     public void onConnect(View view){
 
         final int pos = view.getId();

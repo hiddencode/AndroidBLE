@@ -27,4 +27,5 @@
     <string name="connect">CONNECT</string>
     <string name="read">READ</string>
     <string name="write">WRITE</string>
+    <string name="send_title">Write value:</string>
 </resources>

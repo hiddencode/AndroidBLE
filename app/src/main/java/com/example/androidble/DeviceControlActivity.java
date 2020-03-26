@@ -42,8 +42,6 @@ public class DeviceControlActivity extends AppCompatActivity {
     public static final String EXTRAS_DEVICE_NAME = "DEVICE_NAME";
     public static final String EXTRAS_DEVICE_ADDRESS = "DEVICE_ADDRESS";
     public static final String EXTRAS_DEVICE_UUID = "DEVICE_UUID";
-    private static final String LIST_NAME = "SERVICE_NAME";
-    private static final String LIST_UUID = "SERVICE_UUID";
     private static final String LOG_TAG = "BLE-demo";
 
     private TextView mDataField;
@@ -115,7 +113,7 @@ public class DeviceControlActivity extends AppCompatActivity {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.button_control);    // failed in start
+        setContentView(R.layout.button_control);
 
         final Intent intent = getIntent();
         mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
@@ -137,18 +135,6 @@ public class DeviceControlActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         registerReceiver(mGattUpdateReceiver, makeGattUpdateIntentFilter());
-
-        /*
-        Check request code for activity result
-           if request done :
-                    processing $data
-                    send message with $data
-                    check result operation
-                setResult(RESULT_OK, intent)
-           else:
-                setResult(RESULT_FALSE, intent)
-                finish(); <- md unnecessary
-        */
     }
 
     @Override
@@ -281,35 +267,52 @@ public class DeviceControlActivity extends AppCompatActivity {
         dialogFragment.show(getSupportFragmentManager(),"TAG");
     }
 
-    public void CharacteristicRead(View v) {
-        // Transmit to WriteCharacteristic
-        // Temperate variables
-        UUID uuid = UUID.fromString("ef2a2826-6a74-11ea-bc55-0242ac130004");
-        byte[] bytes = "0xAAA".getBytes();
-        BluetoothGattCharacteristic chs = new BluetoothGattCharacteristic(uuid,BluetoothGattCharacteristic.PROPERTY_WRITE, BluetoothGattCharacteristic.PERMISSION_WRITE);
-
-    }
-
+    /*
+     *  Check for request:
+     *      - Write request
+     *      - Read request
+     *
+     *  If there was no request:
+     *      - do nothing
+     */
     public void checkRequest(){
         Intent intent = getIntent();
         int requestCode = intent.getIntExtra(ServiceControlActivity.EXTRA_REQUEST, 0);
 
-        if(requestCode == ServiceControlActivity.REQUEST_CODE_MESSAGE){
-
+        int writeCode = ServiceControlActivity.REQUEST_CODE_WRITE;
+        int readCode = ServiceControlActivity.REQUEST_CODE_READ;
+        int deadCode = ServiceControlActivity.REQUEST_CODE_MESSAGE;
+        if(requestCode == writeCode || requestCode == deadCode){
             UUID serviceUUID = UUID.fromString(intent.getStringExtra(ServiceControlActivity.EXTRA_SEND_SERVICE_UUID));
             UUID chsUUID = UUID.fromString(intent.getStringExtra(ServiceControlActivity.EXTRA_SEND_CHS_UUID));
             byte[] bytes = intent.getByteArrayExtra(ServiceControlActivity.EXTRA_SEND_BYTES);
 
             copyGatt.getService(serviceUUID).getCharacteristic(chsUUID).setValue(bytes);
-            if(copyGatt.writeCharacteristic(copyGatt.getService(serviceUUID).getCharacteristic(chsUUID))){
+            boolean result = copyGatt.writeCharacteristic(copyGatt.getService(serviceUUID).getCharacteristic(chsUUID));
+            if(result){
                setResult(RESULT_OK);
                finish();
             }else{
                 setResult(RESULT_CANCELED);
                 finish();
             }
+
+        }else if (requestCode == readCode){
+            UUID serviceUUID = UUID.fromString(intent.getStringExtra(ServiceControlActivity.EXTRA_SEND_SERVICE_UUID));
+            UUID chsUUID = UUID.fromString(intent.getStringExtra(ServiceControlActivity.EXTRA_SEND_CHS_UUID));
+            BluetoothGattCharacteristic chsRead = copyGatt.getService(serviceUUID).getCharacteristic(chsUUID);
+
+            boolean result = copyGatt.readCharacteristic(chsRead);
+            if(result){
+                setResult(RESULT_OK);
+                finish();
+            }else{
+                setResult(RESULT_CANCELED);
+                finish();
+            }
         }
     }
+
 
 
 }

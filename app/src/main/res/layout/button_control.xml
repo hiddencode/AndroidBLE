@@ -13,8 +13,7 @@ android:layout_height="match_parent" android:id="@+id/device_control">
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/stub"
-        android:id="@+id/c_read"
-        android:onClick="CharacteristicRead" />
+        android:id="@+id/c_read" />
 
     <TextView
         android:id="@+id/data_value"
