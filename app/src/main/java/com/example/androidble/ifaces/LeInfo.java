@@ -26,7 +26,6 @@ public class LeInfo implements Parcelable {
         List<BluetoothGattCharacteristic> listCHS = new ArrayList<>();
         in.readList(listCHS, List.class.getClassLoader());
         LeCHS = listCHS;
-        //this.LeCHS.addAll(listCHS); //mb unsafe
     }
 
     public List<BluetoothGattCharacteristic> getLeCHS(){

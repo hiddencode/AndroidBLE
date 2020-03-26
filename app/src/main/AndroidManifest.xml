@@ -29,9 +29,8 @@
         <activity android:name=".DeviceControlActivity" />
         <activity android:name=".ServiceControlActivity" />
 
-        <service
-            android:name=".BluetoothLeService"
-            android:enabled="true" />
+        <service android:name=".BluetoothLeService"
+            android:enabled="true"/>
 
     </application>
 

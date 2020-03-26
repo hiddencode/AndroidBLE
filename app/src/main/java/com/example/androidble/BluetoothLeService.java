@@ -30,11 +30,6 @@ public class BluetoothLeService extends Service {
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
 
-    /* State of connection */
-    private static final int STATE_DISCONNECTED = 0;
-    private static final int STATE_CONNECTING = 1;
-    private static final int STATE_CONNECTED = 2;
-
     /* Description gatt actions*/
     public final static String ACTION_GATT_CONNECTED =
             "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
@@ -53,7 +48,6 @@ public class BluetoothLeService extends Service {
         Log.i(DeviceScanActivity.LOG_TAG, "BluetoothLeService - onCreate");
         super.onCreate();
     }
-
 
     // Implements callback methods for GATT events that the app cares about.
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
@@ -83,14 +77,12 @@ public class BluetoothLeService extends Service {
                 Log.w(LOG_TAG, "onServicesDiscovered received: " + status);
             }
         }
-
     };
 
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
         sendBroadcast(intent);
     }
-
 
     // Local binder for getting LeDevices
     class LocalBinder extends Binder {
@@ -117,18 +109,12 @@ public class BluetoothLeService extends Service {
         if (mBluetoothManager == null) {
             mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
             if (mBluetoothManager == null) {
-                Log.e(LOG_TAG, "Unable to initialize BluetoothManager.");
                 return false;
             }
         }
 
         mBluetoothAdapter = mBluetoothManager.getAdapter();
-        if (mBluetoothAdapter == null) {
-            Log.e(LOG_TAG, "Unable to obtain a BluetoothAdapter.");
-            return false;
-        }
-
-        return true;
+        return mBluetoothAdapter != null;
     }
 
     /*
