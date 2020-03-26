@@ -29,7 +29,6 @@ public class BluetoothLeService extends Service {
 
     private String mBluetoothDeviceAddress;
     private BluetoothGatt mBluetoothGatt;
-    private int mConnectionState = STATE_DISCONNECTED;
 
     /* State of connection */
     private static final int STATE_DISCONNECTED = 0;
@@ -47,7 +46,7 @@ public class BluetoothLeService extends Service {
             "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
     public final static String EXTRA_DATA =
             "com.example.bluetooth.le.EXTRA_DATA";
-    public final static UUID UUID_HEART_RATE_MEASUREMENT =  UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
+    public final static UUID UUID_HEART_RATE_MEASUREMENT = UUID.fromString(SampleGattAttributes.HEART_RATE_MEASUREMENT);
 
     @Override
     public void onCreate() {
@@ -64,7 +63,6 @@ public class BluetoothLeService extends Service {
             String intentAction;
             if (newState == BluetoothProfile.STATE_CONNECTED) {
                 intentAction = ACTION_GATT_CONNECTED;
-                mConnectionState = STATE_CONNECTED;
                 broadcastUpdate(intentAction);
                 Log.i(LOG_TAG, "Connected to GATT server.");
                 // Attempts to discover services after successful connection.
@@ -72,7 +70,6 @@ public class BluetoothLeService extends Service {
                 mBluetoothGatt.discoverServices());
             } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
                 intentAction = ACTION_GATT_DISCONNECTED;
-                mConnectionState = STATE_DISCONNECTED;
                 Log.i(LOG_TAG, "Disconnected from GATT server.");
                 broadcastUpdate(intentAction);
             }
@@ -147,7 +144,6 @@ public class BluetoothLeService extends Service {
                 && mBluetoothGatt != null) {
             Log.d(LOG_TAG, "Trying to use an existing mBluetoothGatt for connection.");
             if (mBluetoothGatt.connect()) {
-                mConnectionState = STATE_CONNECTING;
                 return true;
             } else {
                 return false;
@@ -162,7 +158,6 @@ public class BluetoothLeService extends Service {
 
         mBluetoothGatt = device.connectGatt(this, false, mGattCallback);
         mBluetoothDeviceAddress = address;
-        mConnectionState = STATE_CONNECTING;
         return true;
     }
 
@@ -183,8 +178,6 @@ public class BluetoothLeService extends Service {
         mBluetoothGatt.close();
         mBluetoothGatt = null;
     }
-
-
 
     /*
      * Return supported service in Gatt Profile

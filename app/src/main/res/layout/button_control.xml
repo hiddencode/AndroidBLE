@@ -1,25 +1,12 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
 android:orientation="vertical" android:layout_width="match_parent"
 android:layout_height="match_parent" android:id="@+id/device_control">
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/button_send"
-        android:id="@+id/c_write"
-        android:onClick="showDialog"/>
-
-    <Button
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/stub"
-        android:id="@+id/c_read" />
-
     <TextView
-        android:id="@+id/data_value"
+        android:id="@+id/device_info"
         android:layout_width="match_parent"
         android:layout_height="36dp"
-        android:text="@string/no_data" />
+        android:textAlignment="center"
+        android:textSize="26sp"/>
 
     <ExpandableListView
         android:id="@+id/services_list"

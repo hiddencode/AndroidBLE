@@ -7,6 +7,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,8 +15,9 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.androidble.adapters.RecyclerCharacteristicAdapter;
-import com.example.androidble.dialogs.WriteMessageDialogFragment;
+import com.example.androidble.dialogs.ModalDialog;
 import com.example.androidble.ifaces.LeInfo;
+import com.example.androidble.ifaces.OnDismissListener;
 
 import java.util.List;
 import java.util.UUID;
@@ -48,7 +50,6 @@ public class ServiceControlActivity extends AppCompatActivity {
     public BluetoothGattService currentService;
     public List<BluetoothGattCharacteristic> ArrayCharacteristic;
 
-    public WriteMessageDialogFragment  dialogFragment;
 
     private String LOG_TAG = "BLE-demo";
 
@@ -97,17 +98,18 @@ public class ServiceControlActivity extends AppCompatActivity {
     public void showDialog(final View view) {
         String TAG_TX = "WRITE_CHS";
         String TAG_RX = "READ_CHS";
-        final View iview =view;
-        if(iview.getTag() == TAG_TX) {
-            dialogFragment = new WriteMessageDialogFragment();
-            dialogFragment.show(getSupportFragmentManager(), "WRITE");
-            dialogFragment.setDismissListener(new WriteMessageDialogFragment.OnDismissListener() {
+        final View iview = view;
+
+        if( iview.getTag() == TAG_TX){
+            ModalDialog dialogFragment = new ModalDialog();
+            dialogFragment.show(getSupportFragmentManager(), TAG_TX);
+            dialogFragment.setDismissListener(new OnDismissListener() {
                 @Override
-                public void onDismiss(WriteMessageDialogFragment wmdf, byte[] Value) {
+                public void onDismiss(ModalDialog dialog, byte[] Value) {
                     writeCHS(iview, Value);
                 }
             });
-        }else  if(iview.getTag() == TAG_RX){
+        }else if(iview.getTag() == TAG_RX){
             readCHS(iview);
         }
     }

@@ -18,13 +18,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.ExpandableListView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 
 import com.example.androidble.adapters.ExpandableListAdapter;
-import com.example.androidble.dialogs.WriteMessageDialogFragment;
 import com.example.androidble.ifaces.LeInfo;
 
 import java.util.ArrayList;
@@ -44,6 +42,7 @@ public class DeviceControlActivity extends AppCompatActivity {
     public static final String EXTRAS_DEVICE_UUID = "DEVICE_UUID";
     private static final String LOG_TAG = "BLE-demo";
 
+    TextView DeviceInfo;
     private TextView mDataField;
     private ExpandableListView ServicesView;
 
@@ -109,7 +108,7 @@ public class DeviceControlActivity extends AppCompatActivity {
         mDataField.setText(R.string.no_data);
     }
 
-    @SuppressLint("ResourceType")
+    @SuppressLint({"ResourceType", "SetTextI18n"})
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -119,8 +118,9 @@ public class DeviceControlActivity extends AppCompatActivity {
         mDeviceName = intent.getStringExtra(EXTRAS_DEVICE_NAME);
         mDeviceAddress = intent.getStringExtra(EXTRAS_DEVICE_ADDRESS);
 
-        mDataField = findViewById(R.id.data_value);
+        mDataField = findViewById(R.id.device_info);
         ServicesView = findViewById(R.id.services_list);
+
 
         if(getActionBar()!= null) {
             getActionBar().setTitle(mDeviceName);
@@ -184,7 +184,7 @@ public class DeviceControlActivity extends AppCompatActivity {
             @SuppressLint("DefaultLocale")
             @Override
             public void run() {
-                mDataField.setText(format("%d/%s/%s", resourceId, mDeviceName, mDeviceAddress));
+                mDataField.setText(format("%s/%s", mDeviceName, mDeviceAddress));
             }
         });
     }
@@ -261,11 +261,6 @@ public class DeviceControlActivity extends AppCompatActivity {
         return intentFilter;
     }
 
-    /* Call dialog for send message (notify || command)*/
-    public void showDialog(View v) {
-        WriteMessageDialogFragment dialogFragment= new WriteMessageDialogFragment();
-        dialogFragment.show(getSupportFragmentManager(),"TAG");
-    }
 
     /*
      *  Check for request:
