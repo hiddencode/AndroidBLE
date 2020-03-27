@@ -79,9 +79,10 @@ public class BluetoothLeService extends Service {
         }
     };
 
+    // updating broadcast with helps Bluetooth Gatt action
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
-        sendBroadcast(intent);
+        sendBroadcast(intent); // send intent of bluetooth action to broadcast
     }
 
     // Local binder for getting LeDevices
@@ -129,7 +130,7 @@ public class BluetoothLeService extends Service {
         if (address.equals(mBluetoothDeviceAddress)
                 && mBluetoothGatt != null) {
             Log.d(LOG_TAG, "Trying to use an existing mBluetoothGatt for connection.");
-            if (mBluetoothGatt.connect()) {
+            if(mBluetoothGatt.connect()) {
                 return true;
             } else {
                 return false;

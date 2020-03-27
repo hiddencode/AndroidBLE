@@ -46,11 +46,8 @@ public class ServiceControlActivity extends AppCompatActivity {
     public static UUID serviceUUID;
     public static int serviceType;
 
-
     public BluetoothGattService currentService;
     public List<BluetoothGattCharacteristic> ArrayCharacteristic;
-
-
     private String LOG_TAG = "BLE-demo";
 
 
@@ -72,7 +69,6 @@ public class ServiceControlActivity extends AppCompatActivity {
         if(ArrayCharacteristic.size() != 0){
             Log.i(LOG_TAG, "Receive data successful");
         }
-
         Log.i(LOG_TAG,"ServiceControlActivity: onCreate - closed");
     }
 
@@ -92,7 +88,6 @@ public class ServiceControlActivity extends AppCompatActivity {
         }
 
     }
-
 
     /* Call dialog for set value for send message (notify || command) */
     public void showDialog(final View view) {

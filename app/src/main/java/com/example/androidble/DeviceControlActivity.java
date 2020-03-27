@@ -16,13 +16,17 @@ import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ArrayAdapter;
+import android.widget.Button;
 import android.widget.ExpandableListView;
+import android.widget.Spinner;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 
 import com.example.androidble.adapters.ExpandableListAdapter;
+import com.example.androidble.dialogs.GroupDialog;
 import com.example.androidble.ifaces.LeInfo;
 
 import java.util.ArrayList;
@@ -183,7 +187,10 @@ public class DeviceControlActivity extends AppCompatActivity {
             @SuppressLint("DefaultLocale")
             @Override
             public void run() {
-                mDataField.setText(format("%s/%s", mDeviceName, mDeviceAddress));
+                mDataField.setText(mDeviceName + '\n' + mDeviceAddress);
+                Button btn = findViewById(R.id.btn_group);
+                btn.setVisibility(View.VISIBLE);
+                btn.setEnabled(true);
             }
         });
     }
@@ -262,6 +269,8 @@ public class DeviceControlActivity extends AppCompatActivity {
 
 
     /*
+     * TODO: need REFACT it
+     *
      *  Check for request:
      *      - Write request
      *      - Read request
@@ -307,6 +316,15 @@ public class DeviceControlActivity extends AppCompatActivity {
         }
     }
 
+
+    /*
+     * Create instance of GroupDialog,
+     * show it
+     */
+    public void showGroupDialog(View view){
+        GroupDialog dialog = new GroupDialog();
+        dialog.show(getSupportFragmentManager(), "PROC GROUP");
+    }
 
 
 }
