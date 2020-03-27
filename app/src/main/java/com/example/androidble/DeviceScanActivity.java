@@ -216,7 +216,7 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
         final int pos = view.getId();
         final BluetoothDevice device = recyclerServiceAdapter.getDevice(pos);
         Intent activity = new Intent(this, DeviceControlActivity.class);
-        view.setEnabled(false);
+        recyclerView.setEnabled(false);
 
         // Transmit info to DeviceControl
         activity.putExtra(DeviceControlActivity.EXTRAS_DEVICE_NAME, device.getName());

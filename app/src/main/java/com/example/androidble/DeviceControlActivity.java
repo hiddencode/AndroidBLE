@@ -42,7 +42,6 @@ public class DeviceControlActivity extends AppCompatActivity {
     public static final String EXTRAS_DEVICE_UUID = "DEVICE_UUID";
     private static final String LOG_TAG = "BLE-demo";
 
-    TextView DeviceInfo;
     private TextView mDataField;
     private ExpandableListView ServicesView;
 
