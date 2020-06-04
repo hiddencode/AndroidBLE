@@ -49,26 +49,27 @@ public class BluetoothLeService extends Service {
         super.onCreate();
     }
 
-    // Implements callback methods for GATT events that the app cares about.
+    // Implements callback methods for GATT events
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
         // Tracking connection state
         @Override
         public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            String intentAction;
-            if (newState == BluetoothProfile.STATE_CONNECTED) {
-                intentAction = ACTION_GATT_CONNECTED;
-                broadcastUpdate(intentAction);
-                Log.i(LOG_TAG, "Connected to GATT server.");
-                // Attempts to discover services after successful connection.
-                Log.i(LOG_TAG, "Attempting to start service discovery:" +
-                mBluetoothGatt.discoverServices());
-            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
-                intentAction = ACTION_GATT_DISCONNECTED;
-                Log.i(LOG_TAG, "Disconnected from GATT server.");
-                broadcastUpdate(intentAction);
-            }
+                String intentAction;
+                if (newState == BluetoothProfile.STATE_CONNECTED) {
+                        intentAction = ACTION_GATT_CONNECTED;
+                        broadcastUpdate(intentAction);
+                        Log.i(LOG_TAG, "Connected to GATT server.");
+                        // Attempts to discover services after successful connection.
+                        Log.i(LOG_TAG, "Attempting to start service discovery:" +
+                        mBluetoothGatt.discoverServices());
+                } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                        intentAction = ACTION_GATT_DISCONNECTED;
+                        Log.i(LOG_TAG, "Disconnected from GATT server.");
+                        broadcastUpdate(intentAction);
+                }
         }
 
+        // Check up service discovering
         @Override
         public void onServicesDiscovered(BluetoothGatt gatt, int status) {
             if (status == BluetoothGatt.GATT_SUCCESS) {
@@ -78,6 +79,7 @@ public class BluetoothLeService extends Service {
             }
         }
     };
+
 
     private void broadcastUpdate(final String action) {
         final Intent intent = new Intent(action);
@@ -118,7 +120,7 @@ public class BluetoothLeService extends Service {
     }
 
     /*
-     * Connects to the GATT server hosted on the Bluetooth LE device.
+     * Connects to the GATT server using address of Le Device
      */
     public boolean connect(final String address) {
         if (mBluetoothAdapter == null || address == null) {

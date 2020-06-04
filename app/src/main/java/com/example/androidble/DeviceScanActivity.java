@@ -227,7 +227,6 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
         Log.i(LOG_TAG,"Device name:" + device.getName());
         Log.i(LOG_TAG,"Address:" + device.getAddress());
 
-
         startActivity(activity);
     }
 }
