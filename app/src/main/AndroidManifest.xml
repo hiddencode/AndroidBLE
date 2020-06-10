@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.example.androidble"
-    xmlns:dist="http://schemas.android.com/apk/distribution">
+    xmlns:dist="http://schemas.android.com/apk/distribution"
+    package="com.example.androidble">
 
     <dist:module dist:instant="true" />
+
     <uses-feature
         android:name="android.hardware.bluetooth_le"
         android:required="true" />
@@ -15,9 +16,8 @@
     <application
         android:label="@string/app_name"
         android:theme="@style/Theme.AppCompat.DayNight">
-
         <activity
-            android:name=".DeviceScanActivity"
+            android:name=".EspmActivity"
             android:label="@string/app_name">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -25,13 +25,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-
         <activity android:name=".DeviceControlActivity" />
-        <activity android:name=".ServiceControlActivity" />
 
-        <service android:name=".BluetoothLeService"
-            android:enabled="true"/>
-
+        <service
+            android:name=".BluetoothLeService"
+            android:enabled="true" />
     </application>
 
 </manifest>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <TextView
+        android:id="@+id/conn_state"
+        android:layout_width="133dp"
+        android:layout_height="37dp"
+        android:text="Connection"
+        tools:layout_editor_absoluteX="27dp"
+        tools:layout_editor_absoluteY="123dp" />
+
+    <Button
+        android:id="@+id/btn_on"
+        android:layout_width="133dp"
+        android:layout_height="52dp"
+        android:text="ON LED"
+        tools:layout_editor_absoluteX="23dp"
+        tools:layout_editor_absoluteY="196dp" />
+
+    <Button
+        android:id="@+id/btn_off"
+        android:layout_width="133dp"
+        android:layout_height="52dp"
+        android:text="Off LED"
+        tools:layout_editor_absoluteX="23dp"
+        tools:layout_editor_absoluteY="285dp" />
+
+</LinearLayout>

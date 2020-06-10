@@ -5,10 +5,6 @@ import android.Manifest;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-import androidx.recyclerview.widget.LinearLayoutManager;
-import androidx.recyclerview.widget.RecyclerView;
-
-import android.annotation.SuppressLint;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
@@ -19,29 +15,25 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
-import android.view.LayoutInflater;
-import android.view.Menu;
-import android.view.MenuItem;
-import android.view.View;
 import android.widget.Toast;
-
-import com.example.androidble.adapters.RecyclerServiceAdapter;
+import java.util.ArrayList;
 
 
 /**
  * Activity for scanning and displaying available Bluetooth LE devices.
  */
-public class DeviceScanActivity extends AppCompatActivity {          //init class
+public class EspmActivity extends AppCompatActivity {          //init class
 
     static final public String LOG_TAG = "BLE-demo";
-    private RecyclerServiceAdapter recyclerServiceAdapter;
-    private RecyclerView recyclerView;
-
 
     private BluetoothAdapter mBluetoothAdapter;
     // Contain true if scan, and false if not scan
-    private boolean mScanning;
     private Handler mHandler;
+    private boolean mScanning;
+    private Runnable rScanner;
+
+    private int devNum;
+    private ArrayList<BluetoothDevice> bleDevices = new ArrayList<>();
 
     // Request on location
     private static final int LOCATE_PERMISSION_REQUEST = 888;
@@ -51,20 +43,50 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
     // Stops scanning after 10 seconds.
     private static final long SCAN_PERIOD = 10000;
 
-    @SuppressLint("ResourceType")
+
+
+    // ESP states :
+    final static int DEFAULT = 0;
+    final static int DISCONNECTED = 1;
+    final static int CONNECTING = 2;
+    final static int CONNECTED = 3;
+
+    private static int espState = DEFAULT;
+
+
+    // Method for getting ESP state in another classes
+    static int getEspState(){
+        return espState;
+    }
+
+    // Method for changing ESP state
+    static void setEspState(int State){
+        EspmActivity.espState = State;
+    }
+
+
+
     @Override
-    public void onCreate(Bundle savedInstanceState) {   // <----- entry point
+    public void onCreate(Bundle savedInstanceState) {   // <----- entry point of project
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.scan_devices);
+        setContentView(R.layout.espm_managing);
         Log.i(LOG_TAG, "DeviceScanActivity:onCreate");
 
         mHandler = new Handler();
-        // Without it, ScanLeDevice not working
+        devNum = 0;
+        mScanning = false;
+
+        // Without it, ScanLeDevice not working (crunch . . . )
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
         }
 
-        startService(new Intent(this, BluetoothLeService.class)); // start ble service
+        // Create service for BLE interaction
+        startService(new Intent(this, BLEService.class));
+
+        // Maybe transmit checkout BT controller/adapter
+        // to another activity
+        // and using startActivityResult( $Activity )
 
         // Init a Bluetooth adapter with bluetooth manager
         final BluetoothManager bluetoothManager =
@@ -85,46 +107,7 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
             finish();
         }
 
-        // Init recycler view adapter for list of le devices
-        recyclerView = findViewById(R.id.scan_view);
-        LayoutInflater current_inflater = DeviceScanActivity.this.getLayoutInflater();
-        recyclerServiceAdapter = new RecyclerServiceAdapter(current_inflater);
-        recyclerView.setAdapter(recyclerServiceAdapter);
-        recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        Log.i(LOG_TAG, ":onCreate, recycleView has been init");
-    }
-
-    // context menu in right top part
-    // Change visible menu components
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        getMenuInflater().inflate(R.menu.main, menu);
-        if (!mScanning) {
-            menu.findItem(R.id.menu_stop).setVisible(false);
-            menu.findItem(R.id.menu_scan).setVisible(true);
-            menu.findItem(R.id.menu_refresh).setActionView(null);
-        } else {
-            menu.findItem(R.id.menu_stop).setVisible(true);
-            menu.findItem(R.id.menu_scan).setVisible(false);
-            menu.findItem(R.id.menu_refresh).setActionView(
-                    R.layout.actionbar_indeterminate_progress);
-        }
-        return true;
-    }
-
-    // Devices
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case R.id.menu_scan:
-                recyclerServiceAdapter.clear();
-                scanLeDevice(true);
-                break;
-            case R.id.menu_stop:
-                scanLeDevice(false);
-                break;
-        }
-        return true;
+        Log.i(LOG_TAG, ":onCreate run success");
     }
 
 
@@ -145,7 +128,11 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATE_PERMISSION_REQUEST);
         }
 
-        scanLeDevice(true);
+        /*
+        * TODO: Add auto connect
+        *       to ESPM
+        */
+        //scanLeDevice(true);
     }
 
 
@@ -157,7 +144,7 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
             finish();
             return;
         } else {
-            startService(new Intent(this, BluetoothLeService.class));
+            startService(new Intent(this, BLEService.class));
         }
         super.onActivityResult(requestCode, resultCode, data);
     }
@@ -166,21 +153,26 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
     @Override
     protected void onPause() {
         super.onPause();
-        scanLeDevice(false);
-        recyclerServiceAdapter.clear();
-        Intent service = new Intent(this,BluetoothLeService.class);
+       // scanLeDevice(false);
+        Intent service = new Intent(this,BLEService.class);
         stopService(service);
     }
 
 
     private void scanLeDevice(final boolean enable) {
         if (enable) {
-            mHandler.postDelayed(new Runnable() {
+            mHandler.postDelayed(rScanner = new Runnable() {
                 @Override
                 public void run() {
                     mScanning = false;
                     mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                    invalidateOptionsMenu();
+                    if (bleDevices.size() != 0){
+                        Log.i(LOG_TAG, "Found BLE-devices: " + bleDevices.toString());
+                        //connectESPM();
+                    }else {
+                        Log.i(LOG_TAG,"Devices is not found");
+                        //sendBroadcast();
+                    }
                 }
             }, SCAN_PERIOD);
 
@@ -190,43 +182,25 @@ public class DeviceScanActivity extends AppCompatActivity {          //init clas
             mScanning = false;
             mBluetoothAdapter.stopLeScan(mLeScanCallback);
         }
-        invalidateOptionsMenu();
+        // invalidateOptionsMenu();
     }
 
-    // Device scan callback.
+
+    /*
+     * Callback for scanning device
+     */
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
         new BluetoothAdapter.LeScanCallback() {
-
             @Override
             public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
-                runOnUiThread(new Thread() {
-                    @Override
-                    public void run() {
-                        assert true;
-                        recyclerServiceAdapter.addDevice(device);
-                        recyclerServiceAdapter.notifyDataSetChanged();
-                    }
-                });
+                if(mScanning && device != null && device.getName().contains("ESPM")){
+                    Log.i(LOG_TAG, "Added " + device.getName());
+                    mHandler.removeCallbacks(rScanner);
+                    bleDevices.add(device);
+                    rScanner.run();
+                }
             }
         };
 
-    /* Transition to DeviceControl */
-    public void onConnect(View view){
 
-        final int pos = view.getId();
-        final BluetoothDevice device = recyclerServiceAdapter.getDevice(pos);
-        Intent activity = new Intent(this, DeviceControlActivity.class);
-        view.setEnabled(false);
-
-        // Transmit info to DeviceControl
-        activity.putExtra(DeviceControlActivity.EXTRAS_DEVICE_NAME, device.getName());
-        activity.putExtra(DeviceControlActivity.EXTRAS_DEVICE_ADDRESS, device.getAddress());
-        activity.putExtra(DeviceControlActivity.EXTRAS_DEVICE_UUID, device.getUuids());
-
-        Log.i(LOG_TAG,"Position:" + pos);
-        Log.i(LOG_TAG,"Device name:" + device.getName());
-        Log.i(LOG_TAG,"Address:" + device.getAddress());
-
-        startActivity(activity);
-    }
 }
