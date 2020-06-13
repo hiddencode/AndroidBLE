@@ -23,20 +23,6 @@ import android.widget.Toast;
  */
 public class EspmActivity extends AppCompatActivity {          //init class
 
-    /* Description gatt actions*/
-    public final static String ACTION_GATT_CONNECTED =
-            "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
-    public final static String ACTION_GATT_DISCONNECTED =
-            "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
-    public final static String ACTION_GATT_SERVICES_DISCOVERED =
-            "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
-    public final static String ACTION_DATA_AVAILABLE =
-            "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
-    public final static String EXTRA_DATA =
-            "com.example.bluetooth.le.EXTRA_DATA";
-
-    public final static String ESPM_LED_ACTION =
-            "com.example.bluetooth.le.ESPM_LED_ACTION";
 
     static final public String LOG_TAG = "BLE-demo";
     private BluetoothAdapter mBluetoothAdapter;
@@ -138,7 +124,7 @@ public class EspmActivity extends AppCompatActivity {          //init class
     * Send value on espm char
     */
     public void espmLedManaging(View view){
-        broadcastSend(ESPM_LED_ACTION);
+        broadcastSend(BLEService.ESPM_LED_ACTION);
     }
 
 }
