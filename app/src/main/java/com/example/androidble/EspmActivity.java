@@ -6,17 +6,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import android.bluetooth.BluetoothAdapter;
-import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.util.Log;
+import android.view.View;
 import android.widget.Toast;
-import java.util.ArrayList;
+
 
 
 /**
@@ -24,69 +23,46 @@ import java.util.ArrayList;
  */
 public class EspmActivity extends AppCompatActivity {          //init class
 
+    /* Description gatt actions*/
+    public final static String ACTION_GATT_CONNECTED =
+            "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
+    public final static String ACTION_GATT_DISCONNECTED =
+            "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
+    public final static String ACTION_GATT_SERVICES_DISCOVERED =
+            "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
+    public final static String ACTION_DATA_AVAILABLE =
+            "com.example.bluetooth.le.ACTION_DATA_AVAILABLE";
+    public final static String EXTRA_DATA =
+            "com.example.bluetooth.le.EXTRA_DATA";
+
+    public final static String ESPM_LED_ACTION =
+            "com.example.bluetooth.le.ESPM_LED_ACTION";
+
     static final public String LOG_TAG = "BLE-demo";
-
     private BluetoothAdapter mBluetoothAdapter;
-    // Contain true if scan, and false if not scan
-    private Handler mHandler;
-    private boolean mScanning;
-    private Runnable rScanner;
 
-    private int devNum;
-    private ArrayList<BluetoothDevice> bleDevices = new ArrayList<>();
 
     // Request on location
     private static final int LOCATE_PERMISSION_REQUEST = 888;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 456;
     // Request on enable bluetooth
     private static final int REQUEST_ENABLE_BT = 1;
-    // Stops scanning after 10 seconds.
-    private static final long SCAN_PERIOD = 10000;
 
 
-
-    // ESP states :
-    final static int DEFAULT = 0;
-    final static int DISCONNECTED = 1;
-    final static int CONNECTING = 2;
-    final static int CONNECTED = 3;
-
-    private static int espState = DEFAULT;
-
-
-    // Method for getting ESP state in another classes
-    static int getEspState(){
-        return espState;
-    }
-
-    // Method for changing ESP state
-    static void setEspState(int State){
-        EspmActivity.espState = State;
-    }
-
-
-
+    /*
+    * Entry point of activity
+    * Check permissions of app and start BLE service
+    */
     @Override
-    public void onCreate(Bundle savedInstanceState) {   // <----- entry point of project
+    public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.espm_managing);
         Log.i(LOG_TAG, "DeviceScanActivity:onCreate");
 
-        mHandler = new Handler();
-        devNum = 0;
-        mScanning = false;
-
-        // Without it, ScanLeDevice not working (crunch . . . )
+        // Without it, ScanLeDevice not working
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             requestPermissions(new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, PERMISSION_REQUEST_COARSE_LOCATION);
         }
-
-        // Create service for BLE interaction
-        startService(new Intent(this, BLEService.class));
-
-        // Maybe transmit checkout BT controller/adapter
-        // to another activity
-        // and using startActivityResult( $Activity )
 
         // Init a Bluetooth adapter with bluetooth manager
         final BluetoothManager bluetoothManager =
@@ -107,11 +83,15 @@ public class EspmActivity extends AppCompatActivity {          //init class
             finish();
         }
 
-        Log.i(LOG_TAG, ":onCreate run success");
+        startService(new Intent(this, BLEService.class)); // start ble service
+
+        // Init recycler view adapter for list of le devices
+        Log.i(LOG_TAG, ":onCreate, recycleView has been init");
     }
 
-
-    // next point after entry point
+    /*
+    * Checkout BT controller and advanced permissions
+    */
     @Override
     protected void onResume() {
         super.onResume();
@@ -127,80 +107,38 @@ public class EspmActivity extends AppCompatActivity {          //init class
         if (ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATE_PERMISSION_REQUEST);
         }
-
-        /*
-        * TODO: Add auto connect
-        *       to ESPM
-        */
-        //scanLeDevice(true);
     }
 
 
-    // result intent of device control
+    /*
+    * Destroy event of activity
+    * Stop service
+    */
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // Check request code
-        if (requestCode == REQUEST_ENABLE_BT && resultCode == AppCompatActivity.RESULT_CANCELED) {
-            finish();
-            return;
-        } else {
-            startService(new Intent(this, BLEService.class));
-        }
-        super.onActivityResult(requestCode, resultCode, data);
-    }
+    public void onDestroy(){
+        super.onDestroy();
+        Log.i(LOG_TAG, "onDestroy ESPM Activity");
 
-    // Stop scanning in pause event, and clear list
-    @Override
-    protected void onPause() {
-        super.onPause();
-       // scanLeDevice(false);
         Intent service = new Intent(this,BLEService.class);
         stopService(service);
     }
 
 
-    private void scanLeDevice(final boolean enable) {
-        if (enable) {
-            mHandler.postDelayed(rScanner = new Runnable() {
-                @Override
-                public void run() {
-                    mScanning = false;
-                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
-                    if (bleDevices.size() != 0){
-                        Log.i(LOG_TAG, "Found BLE-devices: " + bleDevices.toString());
-                        //connectESPM();
-                    }else {
-                        Log.i(LOG_TAG,"Devices is not found");
-                        //sendBroadcast();
-                    }
-                }
-            }, SCAN_PERIOD);
-
-            mScanning = true;
-            mBluetoothAdapter.startLeScan(mLeScanCallback);
-        } else {
-            mScanning = false;
-            mBluetoothAdapter.stopLeScan(mLeScanCallback);
-        }
-        // invalidateOptionsMenu();
+    /*
+    * Send action to broadcast
+    */
+    private void broadcastSend(final String action){
+        final Intent intent = new Intent(action);
+        sendBroadcast(intent);
     }
 
 
-    /*
-     * Callback for scanning device
-     */
-    private BluetoothAdapter.LeScanCallback mLeScanCallback =
-        new BluetoothAdapter.LeScanCallback() {
-            @Override
-            public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
-                if(mScanning && device != null && device.getName().contains("ESPM")){
-                    Log.i(LOG_TAG, "Added " + device.getName());
-                    mHandler.removeCallbacks(rScanner);
-                    bleDevices.add(device);
-                    rScanner.run();
-                }
-            }
-        };
 
+   /*
+    * Send value on espm char
+    */
+    public void espmLedManaging(View view){
+        broadcastSend(ESPM_LED_ACTION);
+    }
 
 }

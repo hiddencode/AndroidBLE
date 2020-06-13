@@ -7,248 +7,268 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCallback;
 import android.bluetooth.BluetoothGattCharacteristic;
-import android.bluetooth.BluetoothGattDescriptor;
 import android.bluetooth.BluetoothGattService;
+import android.bluetooth.BluetoothManager;
+import android.bluetooth.BluetoothProfile;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
 
-import java.util.ArrayList;
 import java.util.UUID;
 
 
-/*
- * In this class describe service, which helps interaction with BLE-devices
- * Sequence running tasks:
- * Start service : onCreate > onStartCommand
- * Detecting devices: scanLeDevice > onLeScan > rScanner.run
- * Search ESPM and interaction: connectESPM > onConnectionStateChanged > onServicesDiscovered
- * Send message to ESPM : outputMessagesReceiver.onReceive > sendMessagePart > onCharacteristicWrite
+/**
+ * Service for managing connection
  */
 public class BLEService extends Service {
+    private final static String LOG_TAG = "BLE-demo";
 
-    //  Exchange messages (WIP)
-    private String inputMessage;
-    private String[] outputMessage;
-    private int partsCounter;
-    private BroadcastReceiver outputMessagesReceiver;
+    /* For setting up ble */
+    private BluetoothManager mBluetoothManager;
+    private BluetoothAdapter mBluetoothAdapter;
 
-    // For scanning BLE-devices
-    static final BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-    private boolean isScanning;
-    private ArrayList<BluetoothDevice> bleDevices;
-    private Handler handler;
-    private Runnable rScanner;
-    private final int SCAN_PERIOD = 10000;
+    /* For internal interaction*/
+    private BluetoothGatt mBluetoothGatt;
+    BluetoothDevice mDevice = null;
+    BroadcastReceiver signalReceiver;
 
-    // Interaction with BLE-devices
-    private int devNum;
-    private BluetoothGatt ESPMGatt;
-    private final UUID  serviceUuid = UUID.fromString("00000000-0000-0000-0000-0000E017C0FD"),
-    //readChUuid  = UUID.fromString("00000000-0000-0000-0000-0001E017C0FD"),
-    writeChUuid = UUID.fromString("00000000-0000-0000-0000-0002E017C0FD"),
-            notifyChUuid = UUID.fromString("00000000-0000-0000-0000-0003E017C0FD"),
-            descriptorUuid = UUID.fromString("00002902-0000-1000-8000-00805f9b34fb");
+    /* Value for scanning*/
+    private boolean mScanning;
+    private Handler mHandler;
+    int SCAN_PERIOD = 1000;
+
+    /* Description GATT actions */
+    public final static String ACTION_GATT_CONNECTED =
+            "com.example.bluetooth.le.ACTION_GATT_CONNECTED";
+    public final static String ACTION_GATT_DISCONNECTED =
+            "com.example.bluetooth.le.ACTION_GATT_DISCONNECTED";
+    public final static String ACTION_GATT_SERVICES_DISCOVERED =
+            "com.example.bluetooth.le.ACTION_GATT_SERVICES_DISCOVERED";
+    public final static String ESPM_LED_ACTION =
+            "com.example.bluetooth.le.ESPM_LED_ACTION";
+
+    /* Description of ESPM */
+    public final static String ESPM_LED_SERVICE = "000000ff-0000-1000-8000-00805f9b34fb";
+    public final static String ESPM_LED_CHAR = "0000ff01-0000-1000-8000-00805f9b34fb";
 
 
-    private final static String LOG_TAG = "BLE-demo/BLEService";
-    public final static String MESSAGE_TEXT = "Message text";
-
-
+    /*
+     * Entry point of service
+     * Initialize of service and
+     * start scan le device
+     */
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i(LOG_TAG, "Service was create");
-        //bluetoothAdapter.enable();
+        Log.i(LOG_TAG, "BluetoothLeService - onCreate");
+        if(!initialize())
+            return;
 
-        // Init
-        isScanning = false;
-        devNum = 0;
 
-        inputMessage = "";
-        handler = new Handler();
+        /*
+        * Describe receiver implementation
+        * and run it
+        */
+        signalReceiver = new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                sendLedSignal(mBluetoothGatt);
+            }
+        };
+        registerReceiver(signalReceiver, new IntentFilter(ESPM_LED_ACTION));
+
+        /* Init and run scanning */
+        mHandler = new Handler();
+        mScanning = true;
         scanLeDevice(true);
-
     }
 
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
-        Log.i(LOG_TAG, "Фоновая служба запущена");
-        // Scanning devices
-        if (!isScanning) {
-            scanLeDevice(true);
+    /*
+     * Implements callback methods
+     * for GATT events that the app cares about.
+     */
+    private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
+
+        /*
+         * Tracking connection state
+         */
+        @Override
+        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
+            String intentAction;
+            if (newState == BluetoothProfile.STATE_CONNECTED) {
+                intentAction = ACTION_GATT_CONNECTED;
+                broadcastUpdate(intentAction);
+                Log.i(LOG_TAG, "Connected to GATT server.");
+
+                // Attempts to discover services after successful connection.
+                Log.i(LOG_TAG, "Attempting to start service discovery:" + mBluetoothGatt.discoverServices());
+
+            } else if (newState == BluetoothProfile.STATE_DISCONNECTED) {
+                intentAction = ACTION_GATT_DISCONNECTED;
+
+                Log.i(LOG_TAG, "Disconnected from GATT server.");
+                broadcastUpdate(intentAction);
+            }
         }
-        return super.onStartCommand(intent, flags, startId);
+
+        /*
+         * Discover service of device
+         */
+        @Override
+        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
+            if (status == BluetoothGatt.GATT_SUCCESS) {
+                broadcastUpdate(ACTION_GATT_SERVICES_DISCOVERED);
+            } else {
+                Log.w(LOG_TAG, "onServicesDiscovered received: " + status);
+            }
+        }
+    };
+
+    /* Broadcast for transmitting actions */
+    private void broadcastUpdate(final String action) {
+        final Intent intent = new Intent(action);
+        sendBroadcast(intent);
     }
+
+    /*
+    * Send signal to ESPM
+    * using correct BLE characteristic
+    * @param gatt   - BLE GATT profile
+    */
+    private void sendLedSignal(BluetoothGatt gatt){
+        UUID espm_char_uuid = UUID.fromString(ESPM_LED_CHAR);
+        UUID espm_serv_uuid = UUID.fromString(ESPM_LED_SERVICE);
+        byte[] bytes = {0b00, 0b01};
+
+        BluetoothGattService espm_service = gatt.getService(espm_serv_uuid);
+        BluetoothGattCharacteristic espm_char = espm_service.getCharacteristic(espm_char_uuid);
+
+        espm_char.setValue(bytes);
+        gatt.writeCharacteristic(espm_char);
+    }
+
+
+    /*
+     * Local binder for getting LeDevices
+     */
+    class LocalBinder extends Binder {
+        BLEService getService() {
+            return BLEService.this;
+        }
+    }
+
 
     @Override
     public IBinder onBind(Intent intent) {
-        // TODO: Return the communication channel to the service.
-        throw new UnsupportedOperationException("Not yet implemented");
+        return mBinder;
     }
-
-
-    // ------------------------------------------------------------------
-    // Search and create list of ble devices
-    // ------------------------------------------------------------------
-
-    // For scanning devices
-    private void scanLeDevice(final boolean enable) {
-        if (enable) {
-            handler.postDelayed(rScanner = new Runnable() {
-                @Override
-                public void run() {
-                    isScanning = false;
-                    bluetoothAdapter.stopLeScan(leScanCallback);
-                    if (bleDevices.size() != 0) {
-                        Log.i(LOG_TAG, "Found BLE-devices: " + bleDevices.toString());
-                        // Try to find ESPM and connect to it
-                        connectESPM();
-                    } else {
-                        Log.i(LOG_TAG, "Devices is not found");
-                        sendBroadcast(new Intent("CHAT_STATE_CHANGED"));
-                    }
-                }
-            }, SCAN_PERIOD);
-            // Запускаем сканирование, его результаты будут приходить в метод onLeScan
-            isScanning = true;
-            bleDevices = new ArrayList<>();
-            bluetoothAdapter.startLeScan(/*new UUID[]{serviceUuid}, */leScanCallback);
-            Log.i(LOG_TAG, "Detecting active ");
-
-        } else {
-            bluetoothAdapter.stopLeScan(leScanCallback);
-            Log.i(LOG_TAG, "stop le scan");
-        }
-    }
-
-
-    private BluetoothAdapter.LeScanCallback leScanCallback = new BluetoothAdapter.LeScanCallback() {
-        @Override
-        public void onLeScan(BluetoothDevice device, int rssi, byte[] scanRecord) {
-            // Save all devices
-            if (isScanning && !bleDevices.contains(device)) {
-                bleDevices.add(device);
-                Log.i(LOG_TAG, "Devices has been added " + device.toString());
-            }
-            // Stop finding, if we get device
-            if (isScanning
-                    && device != null
-                    && device.getName() != null
-                    && device.getName().contains("IAp")) {
-                Log.i(LOG_TAG, "добавлено " + device.getName());
-                handler.removeCallbacks(rScanner);
-                bleDevices.add(device);
-                rScanner.run();
-            }
-        }
-    };
-
-
-    // ------------------------------------------------------------------
-    // Finds ESPM and interaction
-    // ------------------------------------------------------------------
-
-    // Request for connect to first found devices
-    void connectESPM() {
-        if (devNum < (bleDevices.size())) {
-            Log.i(LOG_TAG, "(" + devNum + ") " + bleDevices.get(devNum).toString() + " - connecting . . .");
-            bleDevices.get(devNum).connectGatt(BLEService.this, false, gattCallback);
-        } else {
-            Log.i(LOG_TAG, "Среди найденных устройств нет тангенты");
-            //ChatActivity.setChatState(ChatActivity.DISCONNECTED);
-            //sendBroadcast(new Intent(CHAT_STATE_CHANGED));
-        }
-    }
-
-    // WIP
-    // GATT callbacks
-    private final BluetoothGattCallback gattCallback = new BluetoothGattCallback() {
-
-        // Results of connect
-        @Override
-        public void onConnectionStateChange(BluetoothGatt gatt, int status, int newState) {
-            super.onConnectionStateChange(gatt, status, newState);
-            //
-            if (newState == BluetoothGatt.STATE_CONNECTED && EspmActivity.getEspState() != EspmActivity.CONNECTED) {
-                Log.i(LOG_TAG, "(" + devNum + ") " + gatt.getDevice().toString() + " - request services . . .");
-                gatt.discoverServices();
-            }
-            if (newState == BluetoothGatt.STATE_DISCONNECTED) {
-                if (EspmActivity.getEspState() != EspmActivity.DEFAULT) {
-                    Log.i(LOG_TAG, "(" + devNum + ") " + gatt.getDevice().toString() + " - turn off");
-                    if (EspmActivity.getEspState() == EspmActivity.CONNECTING) {
-                        devNum++;
-                        connectESPM();
-                    } else {
-                        handler.removeCallbacks(rScanner);
-                        EspmActivity.setEspState(EspmActivity.DISCONNECTED);
-                        sendBroadcast(new Intent("Changed")); // create action var PuFiSt String
-                    }
-                }
-                // After turn off ESPM, close connection
-                if (gatt == ESPMGatt) {
-                    ESPMGatt.close();
-                    ESPMGatt = null;
-                }
-            }
-        }
-
-        // Results of services
-        @Override
-        public void onServicesDiscovered(BluetoothGatt gatt, int status) {
-            super.onServicesDiscovered(gatt, status);
-            Log.i(LOG_TAG, "(" + devNum + ") " + gatt.getDevice().toString() + " - check up services . . .");
-            // Checkout service of device
-            if (gatt.getService(serviceUuid) != null) {
-                Log.i(LOG_TAG, "(" + devNum + ") " + gatt.getDevice().toString() + " - espm :)");
-                EspmActivity.setEspState(EspmActivity.CONNECTED);
-                sendBroadcast(new Intent("Changed")); // create action var PuFiSt String
-                ESPMGatt = gatt;
-                bleDevices = null;
-            } else {
-                Log.i(LOG_TAG, "(" + devNum + ") " + gatt.getDevice().toString() + " - isn`t espm T_T");
-                devNum++;
-                gatt.close();
-                connectESPM();
-            }
-        }
-
-        // Сюда приходят результаты запросов на чтение характеристики
-        @Override
-        public void onCharacteristicRead(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            super.onCharacteristicRead(gatt, characteristic, status);
-            assert  true;
-        }
-
-        @Override
-        public void onCharacteristicWrite(BluetoothGatt gatt, BluetoothGattCharacteristic characteristic, int status) {
-            super.onCharacteristicWrite(gatt, characteristic, status);
-            assert true;
-            //sendMessagePart();
-        }
-
-
-    };
-
 
     @Override
-    public void onDestroy() {
+    public boolean onUnbind(Intent intent) {
+        close();
+        return super.onUnbind(intent);
+    }
+
+    private final IBinder mBinder = new LocalBinder();
+
+    /*
+     * Initialize a reference to the local Bluetooth adapter
+     */
+    public boolean initialize() {
+        if (mBluetoothManager == null) {
+            mBluetoothManager = (BluetoothManager) getSystemService(Context.BLUETOOTH_SERVICE);
+            if (mBluetoothManager == null) {
+                return false;
+            }
+        }
+
+        mBluetoothAdapter = mBluetoothManager.getAdapter();
+        return mBluetoothAdapter != null;
+    }
+
+    /*
+     * LeDevice scan callback
+     */
+    private BluetoothAdapter.LeScanCallback mLeScanCallback =
+            new BluetoothAdapter.LeScanCallback() {
+                @Override
+                public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
+                    if( device.getName().contains("ESPM"))
+                        mDevice = device;
+                    mBluetoothGatt = connectESPM(mDevice);
+                }
+            };
+
+    /*
+     * Method for managing of scan and connect to LeDevices
+     * @param enable    -   value for start/stop(True/False) scanning
+     */
+    private void scanLeDevice(final boolean enable) {
+        if (enable) {
+            mHandler.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    mScanning = false;
+                    mBluetoothAdapter.stopLeScan(mLeScanCallback);
+                }
+            }, SCAN_PERIOD);
+
+            mScanning = true;
+            mBluetoothAdapter.startLeScan(mLeScanCallback);
+            //TODO: define onConnect here (Update TextView)
+        } else {
+            mScanning = false;
+            mBluetoothAdapter.stopLeScan(mLeScanCallback);
+        }
+    }
+
+    /*
+     * Disconnects an existing connection or cancel a pending connection.
+     */
+    public void disconnect() {
+        if (mBluetoothAdapter == null || mBluetoothGatt == null) {
+            Log.i(LOG_TAG, "Disconnect GATT failed");
+            return;
+        }
+        mBluetoothGatt.disconnect();
+    }
+
+    /*
+     * Close Gatt profile
+     */
+    public void close() {
+        if (mBluetoothGatt == null) {
+            Log.i(LOG_TAG, "Closing os failed");
+            return;
+        }
+        mBluetoothGatt.close();
+        mBluetoothGatt = null;
+    }
+
+    /*
+     * Connect to espm
+     */
+    public BluetoothGatt connectESPM(BluetoothDevice espm){
+        return espm.connectGatt(this,false, mGattCallback);
+    }
+
+    /* At destroy event:
+     *                   close service,
+     *                   stop scan,
+     *                   disconnect GATT
+     */
+    @Override
+    public void onDestroy(){
         super.onDestroy();
-        Log.i(LOG_TAG, "Background service was destroyed");
-        // If was detected, stop scanner
-        if (handler != null) {
-            handler.removeCallbacks(rScanner);
-        }
-        bleDevices = null;
-        // If ESPM was found, disconnect of it
-        if (ESPMGatt != null) {
-            ESPMGatt.disconnect();
-        }
-        // Kill receiver
-        unregisterReceiver(outputMessagesReceiver);
+        Log.i(LOG_TAG, "Destroy GATT event");
+
+        scanLeDevice(false);
+        disconnect();
+        close();
     }
 }

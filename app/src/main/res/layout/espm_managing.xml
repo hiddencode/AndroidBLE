@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/espm_layout"
     xmlns:tools="http://schemas.android.com/tools"
     android:orientation="vertical"
     android:layout_width="match_parent"
@@ -15,19 +15,13 @@
         tools:layout_editor_absoluteY="123dp" />
 
     <Button
-        android:id="@+id/btn_on"
+        android:id="@+id/btn_led"
+        android:onClick="espmLedManaging"
         android:layout_width="133dp"
         android:layout_height="52dp"
-        android:text="ON LED"
+        android:text="ON/OFF LED"
         tools:layout_editor_absoluteX="23dp"
         tools:layout_editor_absoluteY="196dp" />
 
-    <Button
-        android:id="@+id/btn_off"
-        android:layout_width="133dp"
-        android:layout_height="52dp"
-        android:text="Off LED"
-        tools:layout_editor_absoluteX="23dp"
-        tools:layout_editor_absoluteY="285dp" />
 
 </LinearLayout>
