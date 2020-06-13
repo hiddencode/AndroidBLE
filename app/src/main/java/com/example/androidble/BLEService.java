@@ -26,7 +26,7 @@ import java.util.UUID;
  * Service for managing connection
  */
 public class BLEService extends Service {
-    private final static String LOG_TAG = "BLE-demo";
+    private final static String LOG_TAG = "BLE-demo|BLEService";
 
     /* For setting up ble */
     private BluetoothManager mBluetoothManager;
@@ -65,18 +65,22 @@ public class BLEService extends Service {
     @Override
     public void onCreate() {
         super.onCreate();
-        Log.i(LOG_TAG, "BluetoothLeService - onCreate");
-        if(!initialize())
-            return;
 
+        Log.i(LOG_TAG,"Initialize service . . .");
+        if(!initialize()) {
+            Log.i(LOG_TAG, "Service crashed");
+            return;
+        }
 
         /*
         * Describe receiver implementation
         * and run it
         */
+        Log.i(LOG_TAG, "Initialize registerReceiver . . .");
         signalReceiver = new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
+                Log.i(LOG_TAG, "Broadcast signal received");
                 sendLedSignal(mBluetoothGatt);
             }
         };
@@ -85,6 +89,7 @@ public class BLEService extends Service {
         /* Init and run scanning */
         mHandler = new Handler();
         mScanning = true;
+        Log.i(LOG_TAG, "Start scanning ble devices");
         scanLeDevice(true);
     }
 
@@ -141,6 +146,11 @@ public class BLEService extends Service {
     * @param gatt   - BLE GATT profile
     */
     private void sendLedSignal(BluetoothGatt gatt){
+        if (gatt == null) {
+            Log.i(LOG_TAG, "Err, GATT wasn`t init");
+            return;
+        }
+
         UUID espm_char_uuid = UUID.fromString(ESPM_LED_CHAR);
         UUID espm_serv_uuid = UUID.fromString(ESPM_LED_SERVICE);
         byte[] bytes = {0b00, 0b01};
@@ -148,8 +158,10 @@ public class BLEService extends Service {
         BluetoothGattService espm_service = gatt.getService(espm_serv_uuid);
         BluetoothGattCharacteristic espm_char = espm_service.getCharacteristic(espm_char_uuid);
 
+        Log.i(LOG_TAG, "Sending signal . . .");
         espm_char.setValue(bytes);
-        gatt.writeCharacteristic(espm_char);
+        boolean pack = gatt.writeCharacteristic(espm_char);
+        Log.i(LOG_TAG, "Result of send = " + pack);
     }
 
 

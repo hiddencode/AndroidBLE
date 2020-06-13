@@ -24,7 +24,7 @@ import android.widget.Toast;
 public class EspmActivity extends AppCompatActivity {          //init class
 
 
-    static final public String LOG_TAG = "BLE-demo";
+    static final public String LOG_TAG = "BLE-demo|EspmActivity";
     private BluetoothAdapter mBluetoothAdapter;
 
 
@@ -43,7 +43,6 @@ public class EspmActivity extends AppCompatActivity {          //init class
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.espm_managing);
-        Log.i(LOG_TAG, "DeviceScanActivity:onCreate");
 
         // Without it, ScanLeDevice not working
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -69,10 +68,6 @@ public class EspmActivity extends AppCompatActivity {          //init class
             finish();
         }
 
-        startService(new Intent(this, BLEService.class)); // start ble service
-
-        // Init recycler view adapter for list of le devices
-        Log.i(LOG_TAG, ":onCreate, recycleView has been init");
     }
 
     /*
@@ -93,6 +88,10 @@ public class EspmActivity extends AppCompatActivity {          //init class
         if (ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, LOCATE_PERMISSION_REQUEST);
         }
+
+        Log.i(LOG_TAG, "Starting BLE service");
+        Intent ble_service = new Intent(this, BLEService.class);
+        startService(ble_service);
     }
 
 
@@ -115,6 +114,7 @@ public class EspmActivity extends AppCompatActivity {          //init class
     */
     private void broadcastSend(final String action){
         final Intent intent = new Intent(action);
+        Log.i(LOG_TAG, "Sending action to broadcast");
         sendBroadcast(intent);
     }
 
