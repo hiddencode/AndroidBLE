@@ -18,6 +18,7 @@ import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
 import android.util.Log;
+import android.widget.TextView;
 
 import java.util.UUID;
 
@@ -27,6 +28,7 @@ import java.util.UUID;
  */
 public class BLEService extends Service {
     private final static String LOG_TAG = "BLE-demo|BLEService";
+    TextView conn_text;
 
     /* For setting up ble */
     private BluetoothManager mBluetoothManager;
@@ -57,7 +59,7 @@ public class BLEService extends Service {
     public final static String ESPM_LED_CHAR = "0000ff01-0000-1000-8000-00805f9b34fb";
 
 
-    /*
+    /**
      * Entry point of service
      * Initialize of service and
      * start scan le device
@@ -93,13 +95,13 @@ public class BLEService extends Service {
         scanLeDevice(true);
     }
 
-    /*
+    /**
      * Implements callback methods
      * for GATT events that the app cares about.
      */
     private final BluetoothGattCallback mGattCallback = new BluetoothGattCallback() {
 
-        /*
+        /**
          * Tracking connection state
          */
         @Override
@@ -140,7 +142,7 @@ public class BLEService extends Service {
         sendBroadcast(intent);
     }
 
-    /*
+    /**
     * Send signal to ESPM
     * using correct BLE characteristic
     * @param gatt   - BLE GATT profile
@@ -165,7 +167,7 @@ public class BLEService extends Service {
     }
 
 
-    /*
+    /**
      * Local binder for getting LeDevices
      */
     class LocalBinder extends Binder {
@@ -188,7 +190,7 @@ public class BLEService extends Service {
 
     private final IBinder mBinder = new LocalBinder();
 
-    /*
+    /**
      * Initialize a reference to the local Bluetooth adapter
      */
     public boolean initialize() {
@@ -203,25 +205,28 @@ public class BLEService extends Service {
         return mBluetoothAdapter != null;
     }
 
-    /*
+    /**
      * LeDevice scan callback
      */
     private BluetoothAdapter.LeScanCallback mLeScanCallback =
             new BluetoothAdapter.LeScanCallback() {
                 @Override
                 public void onLeScan(final BluetoothDevice device, int rssi, byte[] scanRecord) {
-                    if( device.getName().contains("ESPM"))
-                        mDevice = device;
-                    mBluetoothGatt = connectESPM(mDevice);
+                    if(device.getName()!= null) {
+                        if (device.getName().contains("ESPM"))
+                            mDevice = device;
+                        mBluetoothGatt = connectESPM(mDevice);
+                    }
                 }
             };
 
-    /*
+    /**
      * Method for managing of scan and connect to LeDevices
      * @param enable    -   value for start/stop(True/False) scanning
      */
     private void scanLeDevice(final boolean enable) {
         if (enable) {
+
             mHandler.postDelayed(new Runnable() {
                 @Override
                 public void run() {
@@ -239,7 +244,7 @@ public class BLEService extends Service {
         }
     }
 
-    /*
+    /**
      * Disconnects an existing connection or cancel a pending connection.
      */
     public void disconnect() {
@@ -250,7 +255,7 @@ public class BLEService extends Service {
         mBluetoothGatt.disconnect();
     }
 
-    /*
+    /**
      * Close Gatt profile
      */
     public void close() {
@@ -262,8 +267,9 @@ public class BLEService extends Service {
         mBluetoothGatt = null;
     }
 
-    /*
-     * Connect to espm
+    /**
+     * Connect to espm device
+     * @param  espm     - ESP32 device
      */
     public BluetoothGatt connectESPM(BluetoothDevice espm){
         return espm.connectGatt(this,false, mGattCallback);
